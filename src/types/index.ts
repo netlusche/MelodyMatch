@@ -1,0 +1,6 @@
+export type Language = 'en' | 'de';
+export interface Song { id: number; title: string; artist: string; year: string; previewUrl: string; artworkUrl: string; }
+export interface Player { id: string; name: string; score: number; }
+export type GamePhase = 'SETUP' | 'GENRE_SELECTION' | 'PASS_DEVICE' | 'QUIZ' | 'TURN_RESULT' | 'FINAL_RESULTS';
+export type QuestionStep = 'TITLE' | 'ARTIST' | 'YEAR';
+export interface GameState { lang: Language; players: Player[]; currentPlayerIndex: number; currentRound: number; totalRounds: number; phase: GamePhase; songPool: Song[]; currentSong: Song | null; currentStep: QuestionStep; turnPoints: number; turnResults: { title: number; artist: number; year: number; }; history: Song[]; genres: string[]; }

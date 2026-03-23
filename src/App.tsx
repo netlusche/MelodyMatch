@@ -1,0 +1,64 @@
+import React from 'react';
+import { GameProvider, useGame } from './state/GameContext';
+import { SetupScreen } from './components/SetupScreen';
+import { PassDeviceScreen } from './components/PassDeviceScreen';
+import { TurnResultScreen } from './components/TurnResultScreen';
+import { FinalResultsScreen } from './components/FinalResultsScreen';
+import { QuizScreen } from './components/QuizScreen';
+import { GenreScreen } from './components/GenreScreen';
+import { translations } from './i18n/translations';
+
+const MainContent: React.FC = () => {
+  const { state } = useGame();
+
+  switch (state.phase) {
+    case 'SETUP':
+      return <SetupScreen />;
+    case 'GENRE_SELECTION':
+      return <GenreScreen />;
+    case 'PASS_DEVICE':
+      return <PassDeviceScreen />;
+    case 'QUIZ':
+      return <QuizScreen />;
+    case 'TURN_RESULT':
+      return <TurnResultScreen />;
+    case 'FINAL_RESULTS':
+      return <FinalResultsScreen />;
+    default:
+      return <SetupScreen />;
+  }
+};
+
+const MainApp: React.FC = () => {
+  const { state, dispatch } = useGame();
+  const t = translations[state.lang as keyof typeof translations] || translations.en;
+  
+  return (
+    <div style={{ position: 'relative', width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <MainContent />
+      {state.phase !== 'SETUP' && (
+        <button 
+          onClick={() => dispatch({type: 'RESET_GAME'})} 
+          style={{ 
+            position: 'fixed', bottom: '1rem', right: '1rem', 
+            background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', 
+            color: 'var(--text-muted)', fontSize: '0.75rem', 
+            textDecoration: 'none', cursor: 'pointer', padding: '0.4rem 0.8rem', borderRadius: '12px',
+            zIndex: 100
+          }}>
+          {t.startOver}
+        </button>
+      )}
+    </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <GameProvider>
+      <MainApp />
+    </GameProvider>
+  );
+};
+
+export default App;
