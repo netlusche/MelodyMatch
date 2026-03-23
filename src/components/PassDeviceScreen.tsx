@@ -2,6 +2,7 @@ import React from 'react';
 import { useGame } from '../state/GameContext';
 import { translations } from '../i18n/translations';
 import { Smartphone, Play } from 'lucide-react';
+import { normalizeString } from '../utils/stringUtils';
 
 export const PassDeviceScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -9,9 +10,20 @@ export const PassDeviceScreen: React.FC = () => {
   const currentPlayer = state.players[state.currentPlayerIndex];
 
   const handleBeginTurn = () => {
-    // In a full implementation, select a random song from songPool here
-    const randomSong = state.songPool.length > 0 
-      ? state.songPool[Math.floor(Math.random() * state.songPool.length)]
+    const playedKeys = new Set(
+      state.history.map((s: any) => `${normalizeString(s.title)}-${normalizeString(s.artist)}`)
+    );
+    
+    const availablePool = state.songPool.filter((s: any) => {
+      const isPlayedId = state.history.some((h: any) => h.id === s.id);
+      const songKey = `${normalizeString(s.title)}-${normalizeString(s.artist)}`;
+      return !isPlayedId && !playedKeys.has(songKey);
+    });
+
+    const poolToUse = availablePool.length > 0 ? availablePool : state.songPool;
+
+    const randomSong = poolToUse.length > 0 
+      ? poolToUse[Math.floor(Math.random() * poolToUse.length)]
       : { id: 1, title: 'Demo Song', artist: 'Demo Artist', year: '2023', previewUrl: '', artworkUrl: '' };
       
     dispatch({ 

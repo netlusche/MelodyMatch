@@ -3,13 +3,31 @@ import { useGame } from '../state/GameContext';
 import { translations } from '../i18n/translations';
 import { QuestionStep } from '../types';
 import { Disc, PlayCircle, PauseCircle } from 'lucide-react';
+import { normalizeString } from '../utils/stringUtils';
 
 // Generates 3 random wrong answers
 const getOptions = (correct: string, pool: any[], field: string) => {
-  const others = pool.filter(s => s[field] !== correct).map(s => s[field]);
+  const normalizedCorrect = normalizeString(correct);
+  const uniqueOthers = new Map<string, string>();
+  
+  for (const s of pool) {
+    const rawVal = s[field];
+    const norm = normalizeString(rawVal);
+    if (norm !== normalizedCorrect && !uniqueOthers.has(norm)) {
+      uniqueOthers.set(norm, rawVal);
+    }
+  }
+
+  const others = Array.from(uniqueOthers.values());
+  
   // fallback if pool is too small
   while (others.length < 3) {
-    others.push(`Random Choice ${Math.floor(Math.random() * 1000)}`);
+    const fallback = `Random Choice ${Math.floor(Math.random() * 1000)}`;
+    const norm = normalizeString(fallback);
+    if (norm !== normalizedCorrect && !uniqueOthers.has(norm)) {
+      others.push(fallback);
+      uniqueOthers.set(norm, fallback);
+    }
   }
   
   // shuffle others, take 3

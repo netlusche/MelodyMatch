@@ -2,29 +2,42 @@ import { Song } from '../types';
 
 const SEARCH_TERMS = ['pop', 'rock', 'party', '90s', '2000s hits', 'dance', 'chart hits'];
 
+import { normalizeString } from '../utils/stringUtils';
+
 /**
- * Helper to bypass CORS securely strictly via iTunes' native JSONP callback support.
+ * Fallback proxy fetcher to bypass iOS Safari's native interception of iTunes
+ * and strict browser CORS blocks. 
  */
-const fetchJSONP = (url: string): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    const callbackName = 'jsonp_callback_' + Math.round(1000000 * Math.random());
-    const script = document.createElement('script');
-    script.src = `${url}&callback=${callbackName}`;
-    
-    (window as any)[callbackName] = (data: any) => {
-      resolve(data);
-      if (document.body.contains(script)) document.body.removeChild(script);
-      delete (window as any)[callbackName];
-    };
-    
-    script.onerror = () => {
-      reject(new Error('JSONP Request blocked or failed.'));
-      if (document.body.contains(script)) document.body.removeChild(script);
-      delete (window as any)[callbackName];
-    };
-    
-    document.body.appendChild(script);
-  });
+const fetchWithProxyFallback = async (url: string): Promise<any> => {
+  try {
+    const res = await fetch(url);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (e) {
+    // Falls through to proxy if native fetch is intercepted by Apple Music
+  }
+
+  // We explicitly use CodeTabs with a trailing slash! 
+  // CodeTabs natively strips the Mobile Safari User-Agent, bypassing the 301 Apple Music intercept.
+  // The trailing slash prevents cross-origin 301 redirect CORS failures.
+  const PROXIES = [
+    `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`,
+    `https://corsproxy.io/?${encodeURIComponent(url)}`
+  ];
+
+  for (const proxyUrl of PROXIES) {
+    try {
+      const res = await fetch(proxyUrl);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn(`Proxy failed:`, proxyUrl, e);
+    }
+  }
+
+  throw new Error('All proxy fetch attempts failed.');
 };
 
 export const fetchSongs = async (count: number, genres: string[] = ['all']): Promise<Song[]> => {
@@ -44,12 +57,12 @@ export const fetchSongs = async (count: number, genres: string[] = ['all']): Pro
     for (const term of termsToSearch) {
       try {
         let url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&attribute=genreTerm&media=music&limit=${limit}`;
-        let data = await fetchJSONP(url);
+        let data = await fetchWithProxyFallback(url);
         
         // Bulletproof fallback: If the genre isn't recognized natively by iTunes (e.g. "2000s hits"), fallback to a standard text search.
         if (!data.results || data.results.length === 0) {
           url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&media=music&limit=${limit}`;
-          data = await fetchJSONP(url);
+          data = await fetchWithProxyFallback(url);
         }
         
         resultsArray.push(data.results || []);
@@ -60,18 +73,6 @@ export const fetchSongs = async (count: number, genres: string[] = ['all']): Pro
 
     const allResults = resultsArray.flat();
     
-    // Aggressive RegExp normalizer to strip "(Radio Edit)", "[Remastered]", "- Single Version", and non-alphanumerics
-    const normalizeString = (str: string) => {
-      if (!str) return "";
-      return str.toLowerCase()
-        .replace(/\(.*?\)/g, '') // remove anything in parentheses
-        .replace(/\[.*?\]/g, '') // remove anything in brackets
-        .replace(/\s-.*?$/g, '') // remove anything after a spaced hyphen
-        .replace(/feat\..*|ft\..*/g, '') // remove featuring artists
-        .replace(/[^a-z0-9]/g, '') // strip all remaining punctuation and whitespace
-        .trim();
-    };
-
     // Filter out invalid items and definitively deduplicate tracks from overlapping genres and distinct compilation albums using normalized string keys
     const uniqueKeys = new Set();
     const validTracks = allResults.filter((t: any) => {
