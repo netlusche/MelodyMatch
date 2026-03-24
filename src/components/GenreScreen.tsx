@@ -18,7 +18,7 @@ const BASE_GENRES = [
 
 const DE_EXTRAS = [
   { id: 'schlager', label: 'Schlager' },
-  { id: 'neue deutsche welle', label: 'Neue Deutsche Welle' },
+  { id: 'ndw', label: 'NDW' },
   { id: 'deutschpop', label: 'Deutschpop' },
   { id: 'deutschrock', label: 'Deutschrock' },
   { id: 'deutscher rap', label: 'Deutscher Hiphop / Rap' },
