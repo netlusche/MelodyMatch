@@ -12,7 +12,8 @@ const BASE_GENRES = [
   { id: 'electronic', label: 'Electronic' },
   { id: 'r&b', label: 'R&B' },
   { id: 'alternative', label: 'Alternative' },
-  { id: 'classic rock', label: 'Classic Rock' }
+  { id: 'classic rock', label: 'Classic Rock' },
+  { id: 'heavy metal', label: 'Heavy Metal' }
 ];
 
 const DE_EXTRAS = [

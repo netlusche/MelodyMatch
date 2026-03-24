@@ -126,7 +126,7 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
         ...state,
         currentPlayerIndex: 0,
         currentRound: 1,
-        phase: 'PASS_DEVICE',
+        phase: 'SETUP',
         players: state.players.map((p) => ({ ...p, score: 0 })),
         history: [],
       };

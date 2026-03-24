@@ -8,9 +8,11 @@ export const SetupScreen: React.FC = () => {
   const { state, dispatch } = useGame();
   const [lang, setLang] = useState<Language>(state.lang);
   const [rounds, setRounds] = useState<number>(state.totalRounds || 10);
-  const [players, setPlayers] = useState<Player[]>([
-    { id: '1', name: 'Player 1', score: 0 }
-  ]);
+  const [players, setPlayers] = useState<Player[]>(
+    state.players.length > 0 ? state.players : [
+      { id: '1', name: 'Player 1', score: 0 }
+    ]
+  );
 
   const t = translations[lang];
 
