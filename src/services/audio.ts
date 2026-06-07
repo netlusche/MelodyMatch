@@ -16,15 +16,25 @@ class AudioManager {
     if (this.isUnlocked) return;
     const audio = this.getAudio();
     
-    // If we don't have a real URL set yet, warm it up with a 1-byte silent WAV
+    // Check if we already have a real song source set (e.g. from playSong in same gesture)
     const hasRealSrc = audio.src && !audio.src.startsWith('data:');
-    if (!hasRealSrc) {
-      audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAAA';
+    if (hasRealSrc) {
+      this.isUnlocked = true;
+      console.log("Audio unlocked implicitly via real track play gesture");
+      this.removeListeners();
+      return;
     }
+    
+    const silentWav = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAAA';
+    audio.src = silentWav;
     
     audio.play()
       .then(() => {
-        audio.pause();
+        // Only pause if the source is still the silent WAV.
+        // If it was changed to a real song in the meantime, do not pause it.
+        if (audio.src && audio.src.startsWith('data:')) {
+          audio.pause();
+        }
         this.isUnlocked = true;
         console.log("Audio unlocked successfully via user gesture");
         this.removeListeners();
