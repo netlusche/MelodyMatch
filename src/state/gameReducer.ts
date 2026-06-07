@@ -11,7 +11,8 @@ export type GameAction =
   | { type: 'NEXT_TURN' }
   | { type: 'PLAY_AGAIN' }
   | { type: 'RESET_GAME' }
-  | { type: 'SET_THEME'; payload: { theme: Theme } };
+  | { type: 'SET_THEME'; payload: { theme: Theme } }
+  | { type: 'UPDATE_SONG_YEAR'; payload: { songId: number; year: string } };
 
 export const initialState: GameState = {
   lang: 'en',
@@ -142,6 +143,19 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
         ...state,
         theme: action.payload.theme,
       };
+    case 'UPDATE_SONG_YEAR': {
+      const updatedSongPool = state.songPool.map(s => 
+        s.id === action.payload.songId ? { ...s, year: action.payload.year } : s
+      );
+      const updatedCurrentSong = state.currentSong && state.currentSong.id === action.payload.songId
+        ? { ...state.currentSong, year: action.payload.year }
+        : state.currentSong;
+      return {
+        ...state,
+        songPool: updatedSongPool,
+        currentSong: updatedCurrentSong
+      };
+    }
     default:
       return state;
   }

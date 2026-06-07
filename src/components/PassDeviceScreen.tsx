@@ -39,29 +39,64 @@ export const PassDeviceScreen: React.FC = () => {
         console.warn("Autoplay initiation failed on user gesture:", err);
       });
     }
-      
-    // Fetch the correct release year in the background, then transition the phase
+
+    // 1. Create a promise that resolves after 4 seconds
+    const delayPromise = new Promise(resolve => setTimeout(resolve, 4000));
+
+    // 2. Fetch the correct release year in the background, with a strict 4-second timeout
+    let yearPromise: Promise<string>;
     if (randomSong.id && randomSong.id !== 1) {
-      fetchTrackYear(randomSong.id, randomSong.title, randomSong.artist).then((year) => {
-        dispatch({ 
-          type: 'BEGIN_TURN', 
-          payload: { song: { ...randomSong, year } } 
-        });
-      }).catch(() => {
-        dispatch({ 
-          type: 'BEGIN_TURN', 
-          payload: { song: { ...randomSong, year: new Date().getFullYear().toString() } } 
-        });
-      });
+      const timeoutPromise = new Promise<string>((_, reject) => 
+        setTimeout(() => reject(new Error("Year fetch timeout")), 4000)
+      );
+      yearPromise = Promise.race([
+        fetchTrackYear(randomSong.id, randomSong.title, randomSong.artist),
+        timeoutPromise
+      ]).catch(() => new Date().getFullYear().toString());
     } else {
+      yearPromise = Promise.resolve(randomSong.year || '2023');
+    }
+
+    // 3. Wait for both the minimum 2-second delay and year fetch to complete
+    Promise.all([delayPromise, yearPromise]).then(([_, year]) => {
       dispatch({ 
         type: 'BEGIN_TURN', 
-        payload: { song: randomSong } 
+        payload: { song: { ...randomSong, year } } 
       });
-    }
+    });
   };
 
   if (!currentPlayer) return null;
+
+  if (isBeginning) {
+    const getLoadingText = () => {
+      const isDe = state.lang === 'de';
+      switch (state.theme) {
+        case 'matrix':
+          return isDe ? 'Simulation wird initialisiert...' : 'Initializing simulation...';
+        case 'sakura':
+          return isDe ? 'Blütenblätter werden gesammelt...' : 'Gathering cherry blossoms...';
+        case 'westeros':
+          return isDe ? 'Funken werden entzündet...' : 'Igniting flames...';
+        case 'vaporwave':
+          return isDe ? 'Wellen werden synthetisiert...' : 'Synthesizing wave...';
+        case 'default':
+        default:
+          return isDe ? 'Party-Tracks werden geladen...' : 'Loading party tracks...';
+      }
+    };
+
+    return (
+      <div className="screen center-content fade-in" style={{ justifyContent: 'center', minHeight: '80vh' }}>
+        <div className="music-player-ui primary-glow" style={{ padding: '2rem', borderRadius: '50%', background: 'var(--card)', display: 'inline-flex', marginBottom: '1.5rem' }}>
+          <Loader2 size={64} className="loading-spinner" />
+        </div>
+        <h2 className="title-gradient text-center" style={{ fontSize: '1.4rem', fontWeight: 800, margin: 0, paddingInline: '1rem' }}>
+          {getLoadingText()}
+        </h2>
+      </div>
+    );
+  }
 
   return (
     <div className="screen center-content fade-in">
@@ -80,12 +115,8 @@ export const PassDeviceScreen: React.FC = () => {
           onClick={handleBeginTurn}
           disabled={isBeginning}
         >
-          {isBeginning ? (
-            <Loader2 className="icon" size={24} style={{ animation: 'spin 2s linear infinite' }} />
-          ) : (
-            <Play fill="currentColor" size={24} />
-          )}
-          <span>{isBeginning ? 'Loading...' : t.beginTurn}</span>
+          <Play fill="currentColor" size={24} />
+          <span>{t.beginTurn}</span>
         </button>
       </div>
     </div>

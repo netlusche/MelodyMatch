@@ -35,8 +35,9 @@ export const GenreScreen: React.FC = () => {
     ? [{ id: 'all', label: 'Charts' }, ...BASE_GENRES, ...DE_EXTRAS]
     : [{ id: 'all', label: 'Charts' }, ...BASE_GENRES];
 
-  const [selectedGenres, setSelectedGenres] = useState<string[]>(state.genres || ['all']);
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
 
   const handleGenreToggle = (id: string) => {
     let newSelection = [...selectedGenres];
@@ -45,14 +46,14 @@ export const GenreScreen: React.FC = () => {
     } else {
       newSelection.push(id);
     }
-    if (newSelection.length === 0) {
-      setSelectedGenres(['all']);
-    } else {
-      setSelectedGenres(newSelection);
-    }
+    setSelectedGenres(newSelection);
   };
 
   const handleStart = async () => {
+    if (selectedGenres.length === 0) {
+      setShowAlert(true);
+      return;
+    }
     setIsLoading(true);
     // Fetch a massive static pool of 100 songs regardless of round count to guarantee huge variety in wrong-answer multiple-choice generation!
     const fetchedSongs = await fetchSongs(100, selectedGenres);
@@ -93,7 +94,11 @@ export const GenreScreen: React.FC = () => {
       </div>
 
       <div className="w-full max-w-sm mt-4">
-        <button className="option-button primary large w-full" onClick={handleStart} disabled={isLoading}>
+        <button 
+          className={`option-button primary large w-full ${selectedGenres.length === 0 ? 'visually-disabled' : ''}`} 
+          onClick={handleStart} 
+          disabled={isLoading}
+        >
           {isLoading ? (
             <Loader2 className="icon" size={20} style={{ animation: 'spin 2s linear infinite' }} />
           ) : (
@@ -102,6 +107,52 @@ export const GenreScreen: React.FC = () => {
           <span style={{ marginLeft: '0.5rem' }}>{isLoading ? 'Loading...' : t.start}</span>
         </button>
       </div>
+
+      {showAlert && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000,
+          padding: '1.5rem',
+          animation: 'fadeIn 0.2s ease-out'
+        }}>
+          <div style={{
+            background: 'var(--card)',
+            border: '2px solid var(--border-hover)',
+            borderRadius: '16px',
+            padding: '1.5rem',
+            maxWidth: '320px',
+            width: '100%',
+            textAlign: 'center',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            animation: 'scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+          }}>
+            <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--danger)', fontSize: '1.25rem', fontWeight: 800 }}>
+              {state.lang === 'de' ? 'Hinweis' : 'Notice'}
+            </h3>
+            <p className="text-muted" style={{ margin: '0 0 1.25rem 0', fontSize: '0.95rem', lineHeight: '1.4' }}>
+              {state.lang === 'de' 
+                ? 'Bitte wähle mindestens ein Genre aus, bevor du das Spiel startest.' 
+                : 'Please select at least one genre before starting the game.'}
+            </p>
+            <button 
+              className="option-button primary w-full"
+              style={{ minHeight: '44px', fontSize: '0.95rem' }}
+              onClick={() => setShowAlert(false)}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

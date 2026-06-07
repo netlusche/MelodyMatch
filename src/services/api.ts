@@ -44,7 +44,7 @@ const fetchDeezerJsonp = (url: string): Promise<any> => {
     const timeoutId = setTimeout(() => {
       cleanup();
       reject(new Error(`Deezer JSONP timed out for url: ${url}`));
-    }, 8000);
+    }, 2000);
 
     (window as any)[callbackName] = (data: any) => {
       clearTimeout(timeoutId);
@@ -102,6 +102,19 @@ const cleanQueryForYearSearch = (artist: string, title: string): string => {
   return `${cleanArtist} ${cleanTitle}`;
 };
 
+const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeoutMs = 1200): Promise<Response> => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    throw error;
+  }
+};
+
 /**
  * Fetches the exact release year of a track on-the-fly.
  * It queries the iTunes API (via local dev proxy, local PHP proxy, or AllOrigins CORS proxy)
@@ -116,7 +129,7 @@ export const fetchTrackYear = async (trackId: number, title: string, artist: str
   // 1. Try local dev proxy (/api-itunes)
   const devUrl = `/api-itunes/search?term=${encodeURIComponent(query)}&media=music&limit=1`;
   try {
-    const res = await fetch(devUrl);
+    const res = await fetchWithTimeout(devUrl, {}, 1000);
     if (res.ok) {
       const data = await res.json();
       if (data && data.results && data.results[0] && data.results[0].releaseDate) {
@@ -133,7 +146,7 @@ export const fetchTrackYear = async (trackId: number, title: string, artist: str
 
   // 2. Try local PHP proxy (proxy.php) if available (for Strato production)
   try {
-    const res = await fetch(`./proxy.php?term=${encodeURIComponent(query)}&media=music&limit=1`);
+    const res = await fetchWithTimeout(`./proxy.php?term=${encodeURIComponent(query)}&media=music&limit=1`, {}, 1000);
     if (res.ok) {
       const data = await res.json();
       if (data && data.results && data.results[0] && data.results[0].releaseDate) {
@@ -150,7 +163,7 @@ export const fetchTrackYear = async (trackId: number, title: string, artist: str
 
   // 3. Try AllOrigins raw proxy
   try {
-    const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(itunesUrl)}`);
+    const res = await fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(itunesUrl)}`, {}, 1500);
     if (res.ok) {
       const data = await res.json();
       if (data && data.results && data.results[0] && data.results[0].releaseDate) {

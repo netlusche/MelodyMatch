@@ -1,5 +1,5 @@
 export type Language = 'en' | 'de';
-export type Theme = 'default' | 'plain_white' | 'plain_dark';
+export type Theme = 'default' | 'plain_white' | 'plain_dark' | 'matrix' | 'vaporwave' | 'westeros' | 'sakura';
 export interface Song { id: number; title: string; artist: string; year: string; previewUrl: string; artworkUrl: string; }
 export interface Player { id: string; name: string; score: number; }
 export type GamePhase = 'SETUP' | 'GENRE_SELECTION' | 'PASS_DEVICE' | 'QUIZ' | 'TURN_RESULT' | 'FINAL_RESULTS';

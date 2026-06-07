@@ -6,6 +6,7 @@ import { TurnResultScreen } from './components/TurnResultScreen';
 import { FinalResultsScreen } from './components/FinalResultsScreen';
 import { QuizScreen } from './components/QuizScreen';
 import { GenreScreen } from './components/GenreScreen';
+import { BackgroundEffects } from './components/BackgroundEffects';
 import { translations } from './i18n/translations';
 
 import { audioManager } from './services/audio';
@@ -56,6 +57,7 @@ const MainApp: React.FC = () => {
   
   return (
     <div style={{ position: 'relative', width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <BackgroundEffects />
       <MainContent />
       {state.phase !== 'SETUP' && (
         <button 

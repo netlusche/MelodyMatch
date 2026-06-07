@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGame } from '../state/GameContext';
 import { translations } from '../i18n/translations';
-import { CheckCircle, XCircle, ChevronRight } from 'lucide-react';
+import { CheckCircle, XCircle, ChevronRight, Heart } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { addFavorite, removeFavorite, isFavorite } from '../utils/favorites';
 
 export const TurnResultScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -12,6 +13,7 @@ export const TurnResultScreen: React.FC = () => {
   const isCorrect = points > 0;
 
   const [isTransitioning, setIsTransitioning] = React.useState(false);
+  const [isFav, setIsFav] = useState(false);
 
   React.useEffect(() => {
     if (isCorrect) {
@@ -23,6 +25,23 @@ export const TurnResultScreen: React.FC = () => {
       });
     }
   }, [isCorrect]);
+
+  useEffect(() => {
+    if (state.currentSong) {
+      setIsFav(isFavorite(state.currentSong.id));
+    }
+  }, [state.currentSong]);
+
+  const handleToggleFavorite = () => {
+    if (!state.currentSong) return;
+    if (isFav) {
+      removeFavorite(state.currentSong.id);
+      setIsFav(false);
+    } else {
+      addFavorite(state.currentSong);
+      setIsFav(true);
+    }
+  };
 
   const handleNext = () => {
     if (isTransitioning) return;
@@ -45,17 +64,38 @@ export const TurnResultScreen: React.FC = () => {
       </div>
 
       {state.currentSong && (
-        <div className="song-info-card w-full max-w-sm fade-in drop-shadow" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', borderRadius: '12px', background: 'var(--card)', border: '1px solid var(--border)' }}>
+        <div className="song-info-card w-full max-w-sm fade-in drop-shadow" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', borderRadius: '12px', background: 'var(--card)', border: '1px solid var(--border)', position: 'relative' }}>
           {state.currentSong.artworkUrl && (
             <img src={state.currentSong.artworkUrl} alt="Album Art" style={{ width: 60, height: 60, borderRadius: '8px', objectFit: 'cover' }} />
           )}
-          <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1 }}>
+          <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1, paddingRight: '2.5rem' }}>
             <span style={{ fontWeight: 800, fontSize: '1.1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {state.currentSong.title}
             </span>
             <span className="text-muted" style={{ fontWeight: 600, fontSize: '0.9rem' }}>{state.currentSong.artist}</span>
             <span className="text-muted" style={{ fontSize: '0.8rem' }}>{state.currentSong.year}</span>
           </div>
+          <button 
+            className="fav-toggle-btn"
+            onClick={handleToggleFavorite}
+            style={{
+              position: 'absolute',
+              right: '0.75rem',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '0.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: isFav ? 'var(--danger)' : 'var(--text-muted)',
+              transition: 'color 0.2s ease, transform 0.2s ease',
+            }}
+          >
+            <Heart size={22} fill={isFav ? 'currentColor' : 'none'} />
+          </button>
         </div>
       )}
       
