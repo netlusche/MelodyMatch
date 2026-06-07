@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useGame } from '../state/GameContext';
-import { Player, Language } from '../types';
+import { Player, Language, Theme } from '../types';
 import { Users, Settings, Globe, ChevronRight, UserPlus, Trash2 } from 'lucide-react';
 import { translations } from '../i18n/translations';
 
@@ -42,7 +42,20 @@ export const SetupScreen: React.FC = () => {
 
   return (
     <div className="screen setup-screen">
-      <h1 className="title-gradient">{t.title}</h1>
+      <div className="flex justify-between items-center w-full" style={{ marginBottom: '0.5rem' }}>
+        <h1 className="title-gradient" style={{ margin: 0 }}>{t.title}</h1>
+        <div className="theme-select-container">
+          <select 
+            value={state.theme || 'default'} 
+            onChange={(e) => dispatch({ type: 'SET_THEME', payload: { theme: e.target.value as Theme } })}
+            className="theme-select"
+          >
+            <option value="default">Default</option>
+            <option value="plain_white">Plain White</option>
+            <option value="plain_dark">Plain Dark</option>
+          </select>
+        </div>
+      </div>
       
       <div className="setup-section">
         <h2 className="section-title"><Users className="icon" /> {t.setupPlayers} (1-6)</h2>

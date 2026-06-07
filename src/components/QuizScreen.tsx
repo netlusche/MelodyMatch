@@ -11,8 +11,43 @@ const getOptions = (correct: string, pool: any[], field: string) => {
   const normalizedCorrect = normalizeString(correct);
   const uniqueOthers = new Map<string, string>();
   
+  if (field === 'year') {
+    const correctYear = parseInt(correct, 10) || new Date().getFullYear();
+    const currentYear = new Date().getFullYear();
+    
+    // Generate years from 1970 to currentYear, ensuring they are at least 3 years apart
+    const generatedYears: number[] = [];
+    let attempts = 0;
+    while (generatedYears.length < 3 && attempts < 100) {
+      attempts++;
+      const randomYear = Math.floor(Math.random() * (currentYear - 1970 + 1)) + 1970;
+      
+      // Check if it's at least 3 years apart from correctYear
+      if (Math.abs(randomYear - correctYear) < 3) continue;
+      
+      // Check if it's at least 3 years apart from already generated years
+      const isTooClose = generatedYears.some(y => Math.abs(y - randomYear) < 3);
+      if (isTooClose) continue;
+      
+      generatedYears.push(randomYear);
+    }
+    
+    // Fallback if we failed to generate spaced years
+    while (generatedYears.length < 3) {
+      const fallbackYear = correctYear + (generatedYears.length + 1) * 5;
+      if (!generatedYears.includes(fallbackYear)) {
+        generatedYears.push(fallbackYear);
+      }
+    }
+    
+    const selected = generatedYears.map(y => y.toString());
+    selected.push(correct);
+    return selected.sort(() => 0.5 - Math.random());
+  }
+
   for (const s of pool) {
     const rawVal = s[field];
+    if (!rawVal) continue;
     const norm = normalizeString(rawVal);
     if (norm !== normalizedCorrect && !uniqueOthers.has(norm)) {
       uniqueOthers.set(norm, rawVal);

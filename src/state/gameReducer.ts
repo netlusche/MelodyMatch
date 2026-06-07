@@ -1,4 +1,4 @@
-import { GameState, Language, Player, Song, QuestionStep, GamePhase } from '../types';
+import { GameState, Language, Theme, Player, Song, QuestionStep, GamePhase } from '../types';
 
 export type GameAction =
   | { type: 'CONTINUE_TO_GENRES'; payload: { players: Player[]; totalRounds: number; lang: Language; } }
@@ -10,10 +10,12 @@ export type GameAction =
   | { type: 'END_TURN'; payload: { isCorrect: boolean; points: number } }
   | { type: 'NEXT_TURN' }
   | { type: 'PLAY_AGAIN' }
-  | { type: 'RESET_GAME' };
+  | { type: 'RESET_GAME' }
+  | { type: 'SET_THEME'; payload: { theme: Theme } };
 
 export const initialState: GameState = {
   lang: 'en',
+  theme: 'default',
   players: [],
   currentPlayerIndex: 0,
   currentRound: 1,
@@ -131,7 +133,15 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
         history: [],
       };
     case 'RESET_GAME':
-      return initialState;
+      return {
+        ...initialState,
+        theme: state.theme,
+      };
+    case 'SET_THEME':
+      return {
+        ...state,
+        theme: action.payload.theme,
+      };
     default:
       return state;
   }

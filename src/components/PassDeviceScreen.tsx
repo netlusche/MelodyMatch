@@ -4,6 +4,7 @@ import { translations } from '../i18n/translations';
 import { Smartphone, Play } from 'lucide-react';
 import { normalizeString } from '../utils/stringUtils';
 import { audioManager } from '../services/audio';
+import { fetchTrackYear } from '../services/api';
 
 export const PassDeviceScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -27,17 +28,33 @@ export const PassDeviceScreen: React.FC = () => {
       ? poolToUse[Math.floor(Math.random() * poolToUse.length)]
       : { id: 1, title: 'Demo Song', artist: 'Demo Artist', year: '2023', previewUrl: '', artworkUrl: '' };
 
-    // Play the song immediately inside the user gesture handler to bypass browser autoplay blocks
+    // Play the song immediately and synchronously inside the user gesture handler
+    // to preserve the gesture token for iOS Safari.
     if (randomSong.previewUrl) {
       audioManager.playSong(randomSong.previewUrl).catch(err => {
         console.warn("Autoplay initiation failed on user gesture:", err);
       });
     }
       
-    dispatch({ 
-      type: 'BEGIN_TURN', 
-      payload: { song: randomSong } 
-    });
+    // Fetch the correct release year in the background, then transition the phase
+    if (randomSong.id && randomSong.id !== 1) {
+      fetchTrackYear(randomSong.id).then((year) => {
+        dispatch({ 
+          type: 'BEGIN_TURN', 
+          payload: { song: { ...randomSong, year } } 
+        });
+      }).catch(() => {
+        dispatch({ 
+          type: 'BEGIN_TURN', 
+          payload: { song: { ...randomSong, year: new Date().getFullYear().toString() } } 
+        });
+      });
+    } else {
+      dispatch({ 
+        type: 'BEGIN_TURN', 
+        payload: { song: randomSong } 
+      });
+    }
   };
 
   if (!currentPlayer) return null;

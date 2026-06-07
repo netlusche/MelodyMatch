@@ -40,6 +40,11 @@ const MainApp: React.FC = () => {
   }, []);
 
   React.useEffect(() => {
+    document.body.className = '';
+    document.body.classList.add(`theme-${state.theme || 'default'}`);
+  }, [state.theme]);
+
+  React.useEffect(() => {
     if (state.phase === 'QUIZ' && state.currentSong?.previewUrl) {
       audioManager.playSong(state.currentSong.previewUrl).catch(err => {
         console.warn("Root autoplay initiation failed:", err);
