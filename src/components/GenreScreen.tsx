@@ -39,11 +39,7 @@ export const GenreScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGenreToggle = (id: string) => {
-    if (id === 'all') {
-      setSelectedGenres(['all']);
-      return;
-    }
-    let newSelection = selectedGenres.filter(g => g !== 'all');
+    let newSelection = [...selectedGenres];
     if (newSelection.includes(id)) {
       newSelection = newSelection.filter(g => g !== id);
     } else {

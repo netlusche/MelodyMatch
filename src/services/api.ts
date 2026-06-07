@@ -184,13 +184,7 @@ export const fetchTrackYear = async (trackId: number, title: string, artist: str
 
 export const fetchSongs = async (count: number, genres: string[] = ['all']): Promise<Song[]> => {
   try {
-    let termsToSearch: string[] = [];
-    
-    if (genres.includes('all') || genres.length === 0) {
-      termsToSearch = ['all'];
-    } else {
-      termsToSearch = genres;
-    }
+    const termsToSearch = genres.length === 0 ? ['all'] : genres;
 
     const resultsArray = [];
     for (const term of termsToSearch) {
