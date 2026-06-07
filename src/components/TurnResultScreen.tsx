@@ -4,6 +4,7 @@ import { translations } from '../i18n/translations';
 import { CheckCircle, XCircle, ChevronRight, Heart } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { addFavorite, removeFavorite, isFavorite } from '../utils/favorites';
+import { getThemeConfettiColors } from '../utils/confettiColors';
 
 export const TurnResultScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -21,10 +22,10 @@ export const TurnResultScreen: React.FC = () => {
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#8b5cf6', '#ec4899', '#10b981', '#fbbf24']
+        colors: getThemeConfettiColors(state.theme)
       });
     }
-  }, [isCorrect]);
+  }, [isCorrect, state.theme]);
 
   useEffect(() => {
     if (state.currentSong) {

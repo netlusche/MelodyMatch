@@ -7,7 +7,7 @@ A fast-paced, interactive, modern local-multiplayer music quiz built with React,
 - **Curated Playlists & Charts**: 
   - Selecting **Charts** pulls directly from Deezer's global top hits.
   - Selecting sub-genres (e.g. *Indie*, *Classic Rock*, *Schlager*, *NDW*, *Deutschpop*, *Deutscher Rap*, *Ballermann*, *New Wave / Post-Punk*, *Partyhits*) fetches songs directly from top curated editorial playlists rather than text searches. This guarantees genuine genre hits and completely avoids search pollution.
-- **Original Release Year Lookup**: To prevent remastered or compilation album dates (e.g. Journey's *Don't Stop Believin'* showing 2001 instead of 1981), the app queries the **iTunes Search API** on-the-fly for the original track release date. It cascades through local dev proxy, `proxy.php`, AllOrigins, and falls back to Deezer.
+- **Original Release Year Lookup**: To prevent remastered or compilation album dates (e.g. Journey's *Don't Stop Believin'* showing 2001 instead of 1981), the app queries the **MusicBrainz API** on-the-fly, searching up to 100 recording matches to extract the earliest release date. It cascades through the **iTunes Search API** (via local dev proxy, `proxy.php`, or AllOrigins proxy) and falls back to the **Deezer API** track metadata.
 - **Global Title & Text Sanitization**: Suffixes like `(Remastered)`, `(2001 Remaster)`, `[Live]`, or `(Rerecorded)` are automatically stripped globally, ensuring clean titles are displayed in the UI and multiple-choice distractor options.
 - **Double-Click & Rapid-Tap Protection**: State transition buttons and multiple-choice answer grids are guarded against rapid consecutive taps, preventing accidental step skips or out-of-sync audio queues.
 - **Safari Autoplay Unlock**: Synchronously anchors the audio play promise to the user gesture (e.g., clicking "Begin Turn"), ensuring audio previews play instantly on iOS Safari.
@@ -39,8 +39,8 @@ Because the Deezer song fetches use client-side JSONP, **the application can be 
 ## Disclaimers & API Terms
 This application is a **non-commercial hobby project** developed solely for entertainment and educational purposes.
 - **No Commercial Intent**: This application does not generate revenue, contain ads, or charge users in any way.
-- **API Utilization**: Music previews and metadata are fetched in real-time from the public APIs of **Deezer** and **iTunes (Apple)**.
-- **Ownership**: All audio snippets, artist names, track titles, and album artworks are the intellectual property of their respective owners and copyright holders. This project is not affiliated, associated, authorized, endorsed by, or in any way officially connected with Deezer, Apple, or any of their subsidiaries or affiliates.
+- **API Utilization**: Music previews and metadata are fetched in real-time from the public APIs of **Deezer**, **iTunes (Apple)**, and **MusicBrainz**.
+- **Ownership**: All audio snippets, artist names, track titles, and album artworks are the intellectual property of their respective owners and copyright holders. This project is not affiliated, associated, authorized, endorsed by, or in any way officially connected with Deezer, Apple, MusicBrainz, or any of their subsidiaries or affiliates.
 
 ## License
 Released under the [MIT License](file:///Users/frank/Antigravity/MelodyMatch/LICENSE).

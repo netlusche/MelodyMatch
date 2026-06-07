@@ -130,11 +130,57 @@ const fetchWithTimeout = async (url: string, options: RequestInit = {}, timeoutM
  * even when it is hosted on a compilation or remastered album.
  * Falls back to Deezer track metadata if iTunes queries fail.
  */
+const cleanLuceneQuery = (str: string): string => {
+  return str
+    .replace(/[+\-&|!(){}\[\]^"~*?:\\\/]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
 export const fetchTrackYear = async (trackId: number, title: string, artist: string): Promise<string> => {
+  const cleanTitle = cleanSongTitle(title);
+  const cleanArtist = artist.replace(/\s+(feat|ft)\.?\s+.*$/gi, '').trim();
+
+  // 1. Try MusicBrainz API as primary source (CORS-friendly, very accurate for original years)
+  try {
+    const mbQuery = `artist:"${cleanLuceneQuery(cleanArtist)}" AND recording:"${cleanLuceneQuery(cleanTitle)}"`;
+    const mbUrl = `https://musicbrainz.org/ws/2/recording/?query=${encodeURIComponent(mbQuery)}&limit=100&fmt=json`;
+    const res = await fetchWithTimeout(mbUrl, {
+      headers: {
+        'Accept': 'application/json'
+      }
+    }, 1500);
+
+    if (res.ok) {
+      const data = await res.json();
+      const recordings = data.recordings || [];
+      const years: number[] = [];
+      
+      recordings.forEach((rec: any) => {
+        const dateStr = rec['first-release-date'];
+        if (dateStr && dateStr.length >= 4) {
+          const yearPart = parseInt(dateStr.substring(0, 4), 10);
+          if (!isNaN(yearPart) && yearPart >= 1900 && yearPart <= new Date().getFullYear() + 2) {
+            years.push(yearPart);
+          }
+        }
+      });
+      
+      if (years.length > 0) {
+        const earliestYear = Math.min(...years).toString();
+        console.log(`Fetched original year via MusicBrainz for "${cleanArtist} - ${cleanTitle}":`, earliestYear);
+        return earliestYear;
+      }
+    }
+  } catch (e) {
+    console.warn("MusicBrainz year fetch failed, cascading to iTunes...", e);
+  }
+
+  // 2. iTunes Fallback (Cascading proxies)
   const query = cleanQueryForYearSearch(artist, title);
   const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&limit=1`;
   
-  // 1. Try local dev proxy (/api-itunes)
+  // 2.1. Try local dev proxy (/api-itunes)
   const devUrl = `/api-itunes/search?term=${encodeURIComponent(query)}&media=music&limit=1`;
   try {
     const res = await fetchWithTimeout(devUrl, {}, 1000);
@@ -152,7 +198,7 @@ export const fetchTrackYear = async (trackId: number, title: string, artist: str
     // Expected to fail in production
   }
 
-  // 2. Try local PHP proxy (proxy.php) if available (for Strato production)
+  // 2.2. Try local PHP proxy (proxy.php) if available (for Strato production)
   try {
     const res = await fetchWithTimeout(`./proxy.php?term=${encodeURIComponent(query)}&media=music&limit=1`, {}, 1000);
     if (res.ok) {
@@ -169,7 +215,7 @@ export const fetchTrackYear = async (trackId: number, title: string, artist: str
     console.warn("Local PHP proxy failed for year fetch:", e);
   }
 
-  // 3. Try AllOrigins raw proxy
+  // 2.3. Try AllOrigins raw proxy
   try {
     const res = await fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(itunesUrl)}`, {}, 1500);
     if (res.ok) {
@@ -186,7 +232,7 @@ export const fetchTrackYear = async (trackId: number, title: string, artist: str
     console.warn("AllOrigins proxy failed for year fetch:", e);
   }
 
-  // 4. Fallback: Fetch Deezer track details (might be compilation year, but safe fallback)
+  // 3. Fallback: Fetch Deezer track details (might be compilation year, but safe fallback)
   try {
     const data = await fetchDeezerJsonp(`https://api.deezer.com/track/${trackId}`);
     if (data && data.release_date) {

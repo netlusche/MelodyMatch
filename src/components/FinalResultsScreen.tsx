@@ -4,6 +4,7 @@ import { translations } from '../i18n/translations';
 import { Trophy, RotateCcw, Medal, Heart, Play, Square } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { addFavorite, removeFavorite, getFavorites } from '../utils/favorites';
+import { getThemeConfettiColors } from '../utils/confettiColors';
 
 export const FinalResultsScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -60,6 +61,7 @@ export const FinalResultsScreen: React.FC = () => {
   React.useEffect(() => {
     const duration = 3000;
     const end = Date.now() + duration;
+    const colors = getThemeConfettiColors(state.theme);
 
     const frame = () => {
       confetti({
@@ -67,19 +69,19 @@ export const FinalResultsScreen: React.FC = () => {
         angle: 60,
         spread: 55,
         origin: { x: 0 },
-        colors: ['#8b5cf6', '#ec4899', '#fbbf24']
+        colors: colors
       });
       confetti({
         particleCount: 5,
         angle: 120,
         spread: 55,
         origin: { x: 1 },
-        colors: ['#8b5cf6', '#ec4899', '#fbbf24']
+        colors: colors
       });
       if (Date.now() < end) requestAnimationFrame(frame);
     };
     frame();
-  }, []);
+  }, [state.theme]);
 
   const [isTransitioning, setIsTransitioning] = React.useState(false);
 
