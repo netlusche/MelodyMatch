@@ -33,5 +33,11 @@ Because the Deezer song fetches use client-side JSONP, **the application can be 
 - The iTunes year-lookup cascades through client-side options (AllOrigins CORS proxy and Deezer fallback), meaning **no server-side proxies or backend rewrites are required for the game to function**.
 - Optionally, if you host on a PHP-enabled server, the included `proxy.php` will be used to proxy iTunes year queries. On Vercel or Netlify, the included rewrite rules in `vercel.json` and `_redirects` will be automatically active.
 
+## Disclaimers & API Terms
+This application is a **non-commercial hobby project** developed solely for entertainment and educational purposes.
+- **No Commercial Intent**: This application does not generate revenue, contain ads, or charge users in any way.
+- **API Utilization**: Music previews and metadata are fetched in real-time from the public APIs of **Deezer** and **iTunes (Apple)**.
+- **Ownership**: All audio snippets, artist names, track titles, and album artworks are the intellectual property of their respective owners and copyright holders. This project is not affiliated, associated, authorized, endorsed by, or in any way officially connected with Deezer, Apple, or any of their subsidiaries or affiliates.
+
 ## License
-Released under the GPL-3.0 License.
+Released under the [MIT License](file:///Users/frank/Antigravity/MelodyMatch/LICENSE).
