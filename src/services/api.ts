@@ -22,6 +22,14 @@ const PLAYLIST_MAP: Record<string, number | number[]> = {
   'ballermann': 10328601542, // Ballermann Party Hits
   'partyhits': 2097558104, // Party Hits
   'new wave': [8515679522, 8700369282], // New Wave Essentials & Post-Punk Essentials
+  
+  // Decades
+  '50s': [735402575, 4020144442],
+  '60s': [620264073, 1437011185],
+  '70s': [1470022445, 8877326262],
+  '80s': [867825522, 1913763402],
+  '90s': [878989033, 3829647662],
+  '2000+': [248297032, 715215865],
 };
 
 const SEARCH_TERMS = ['pop music', 'rock music', 'party hits', '90s hits', '2000s hits', 'dance music', 'chart hits'];
