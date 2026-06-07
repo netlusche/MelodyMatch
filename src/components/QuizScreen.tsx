@@ -82,6 +82,12 @@ export const QuizScreen: React.FC = () => {
   const step = state.currentStep;
   
   const [isPlaying, setIsPlaying] = useState(!audioManager.getAudio().paused);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Reset transitioning state when the active step changes
+  React.useEffect(() => {
+    setIsTransitioning(false);
+  }, [step]);
 
   const toggleAudio = () => {
     if (isPlaying) {
@@ -118,7 +124,9 @@ export const QuizScreen: React.FC = () => {
   };
 
   const handleAnswer = (choice: string) => {
-    if (!song) return;
+    if (isTransitioning || !song) return;
+    setIsTransitioning(true);
+
     const fieldMap: Record<QuestionStep, 'title' | 'artist' | 'year'> = {
       TITLE: 'title',
       ARTIST: 'artist',

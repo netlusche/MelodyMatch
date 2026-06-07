@@ -36,7 +36,11 @@ export const FinalResultsScreen: React.FC = () => {
     frame();
   }, []);
 
+  const [isTransitioning, setIsTransitioning] = React.useState(false);
+
   const handlePlayAgain = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
     dispatch({ type: 'PLAY_AGAIN' });
   };
 

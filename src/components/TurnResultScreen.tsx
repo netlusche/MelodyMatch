@@ -11,6 +11,8 @@ export const TurnResultScreen: React.FC = () => {
   const points = state.turnPoints;
   const isCorrect = points > 0;
 
+  const [isTransitioning, setIsTransitioning] = React.useState(false);
+
   React.useEffect(() => {
     if (isCorrect) {
       confetti({
@@ -23,6 +25,8 @@ export const TurnResultScreen: React.FC = () => {
   }, [isCorrect]);
 
   const handleNext = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
     dispatch({ type: 'NEXT_TURN' });
   };
 
@@ -58,15 +62,15 @@ export const TurnResultScreen: React.FC = () => {
       <div className="score-badge mt-2 w-full max-w-sm" style={{ padding: '0.75rem 1rem', alignItems: 'stretch' }}>
         <h2 className="text-center mb-2 m-0" style={{ fontSize: '1.25rem' }}>Total: +{points} Points</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', width: '100%' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.95rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', background: 'var(--row-bg)', borderRadius: '8px', fontSize: '0.95rem' }}>
             <span>Song Title:</span>
             <span className={state.turnResults?.title > 0 ? 'text-success' : 'text-danger'} style={{ fontWeight: 800 }}>+{state.turnResults?.title || 0}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.95rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', background: 'var(--row-bg)', borderRadius: '8px', fontSize: '0.95rem' }}>
             <span>Artist:</span>
             <span className={state.turnResults?.artist > 0 ? 'text-success' : 'text-danger'} style={{ fontWeight: 800 }}>+{state.turnResults?.artist || 0}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', fontSize: '0.95rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem', background: 'var(--row-bg)', borderRadius: '8px', fontSize: '0.95rem' }}>
             <span>Year:</span>
             <span className={state.turnResults?.year > 0 ? 'text-success' : 'text-danger'} style={{ fontWeight: 800 }}>+{state.turnResults?.year || 0}</span>
           </div>

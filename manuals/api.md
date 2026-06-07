@@ -1,42 +1,56 @@
 # MelodyMatch API Manual
 
 ## Overview
-MelodyMatch fetches music metadata and audio previews utilizing the **iTunes Search API**. To ensure high reliability across all platforms—especially iOS Safari, which natively intercepts iTunes links—requests are dynamically routed through fallback CORS proxies if the native browser fetch fails.
+MelodyMatch fetches music metadata and audio previews primarily utilizing the **Deezer API**. To ensure seamless compatibility and bypass CORS blocks directly in the browser (especially on iOS Safari), the application uses client-side **JSONP** requests (`output=jsonp`). 
 
-## The Genre Selection Payload
-After the user finishes configuring the game on the `GenreScreen`, a string array of selected genres is gathered.
+To obtain original release years (rather than compilation release dates), the app performs an on-the-fly query to the **iTunes Search API** when a player starts their turn.
 
-1. **User Selection**: The user selects one or multiple genres (e.g., `["pop", "rock", "heavy metal"]`).
-2. **"All Genres" Rule**: If the selection includes "All Genres" (or is completely empty), the application defaults to a single, randomly chosen broad term from a hardcoded list (e.g., `'party'`, `'90s'`, `'chart hits'`).
-3. **Dispatch**: The final array of genre string terms is passed to the `fetchSongs(count, genres)` function. The `count` is heavily padded (e.g., requesting `100` tracks) regardless of the actual game length, guaranteeing a massive variety pool to generate realistic multiple-choice trivia answers later on.
+---
 
-## How the API Processes the Request
+## 1. Initial Song Pool Fetch
 
-Inside `src/services/api.ts`, the frontend executes the following process for **each** genre term in the payload array:
+When the user configures the game and clicks "Start Game", the application gathers the selected genres and calls `fetchSongs(count, genres)`:
 
-### 1. Primary Query Formulation
-For each term, it constructs an iTunes API request targeting the `genreTerm` attribute, fetching a maximum of 200 tracks per search to cast a wide net:
-`https://itunes.apple.com/search?term={GENRE_TERM}&attribute=genreTerm&media=music&limit=200`
+1. **Charts vs. Specific Genres**:
+   - If **Charts** (key: `'all'`) is selected, it queries Deezer's global charts:
+     `https://api.deezer.com/chart/0/tracks?limit=300`
+   - If a main genre (e.g., *Pop*, *Rock*, *Heavy Metal*) is selected, it queries the genre-specific chart using `GENRE_MAP`:
+     `https://api.deezer.com/chart/{genreId}/tracks?limit=300`
+   - If a sub-genre (e.g., *Schlager*, *NDW*, *Indie*, *New Wave / Post-Punk*) is selected, it maps it to curated editorial playlist IDs in `PLAYLIST_MAP` (supporting single IDs or arrays of IDs) and queries the playlist tracklists:
+     `https://api.deezer.com/playlist/{playlistId}/tracks?limit=300`
+   - If no map matches, it falls back to a standard text search query:
+     `https://api.deezer.com/search?q={term}&limit=300`
 
-### 2. Network Proxy Redundancy
-Because the device might reject the native `fetch` (due to CORS policies or Apple Music deep-linking intercepts on iPhones), the request is layered:
-- **Native Fetch**: Tried first.
-- **Proxy 1**: `api.codetabs.com` (strips User-Agent to bypass Apple Music redirects)
-- **Proxy 2**: `corsproxy.io` (standard fallback)
-If the first fails, it silently cascades to the next.
+2. **JSONP Fetcher (`fetchDeezerJsonp`)**:
+   Deezer allows script-based callbacks by appending `output=jsonp&callback=...` to the URL. The app dynamically appends a `<script>` tag to the document, registers a unique window callback, and resolves the promise when the script executes, bypassing CORS.
 
-### 3. Broad Match Fallback
-If the network request successfully returns, but the payload has `0` results (which happens because iTunes may not strictly classify query strings like "2000s hits" or "Partyhits" as an official `genreTerm`), the API drops the `attribute=genreTerm` modifier entirely. It then fires a second network request using a standard, global text search for that term across the music database.
+3. **Title Sanitization (`cleanSongTitle`)**:
+   Before placing songs in the pool, their titles are globally sanitized to strip out cluttering remastered, live, or version suffixes like `(Remastered)`, `(2001 Remaster)`, `[Live]`, or `(Rerecorded)`. This ensures that:
+   - Clean titles are shown in the UI.
+   - Clean titles are used to generate wrong answers in multiple-choice grids.
+   - iTunes queries are clean and match original releases.
 
-### 4. Aggregation and Deduplication
-The arrays from all successful genre queries are flattened into a single massive unrefined list.
-The `api.ts` service then forcefully sanitizes the list:
-- **Filtering**: Tracks missing critical data (preview audio, artwork, or valid release dates) are discarded.
-- **Deduplication**: The service normalizes the track titles and artist names into string keys (e.g., removing special characters and cases). It uses a `Set` matching algorithm to actively reject any track that shares the same Title/Artist key. This eliminates duplicates caused by genre overlaps, remasters, or "Greatest Hits" compilations.
+4. **Deduplication & Shuffle**:
+   Tracks are normalized to an alphanumeric title-artist key to discard duplicates (e.g. from overlapping genre charts). The remaining tracks are shuffled and sliced to the requested pool size (e.g. 100).
 
-### 5. Data Mapping
-The valid, unique tracks are shuffled randomly. The finalized pool is trimmed to exactly the requested `count` (100).
-Finally, the chaotic iTunes JSON payload is mapped securely into the application's clean TypeScript `Song` format:
-- It isolates only the year from the full `releaseDate` ISO string.
-- It dynamically modifies the `artworkUrl100` string (replacing `100x100bb` with `600x600bb`) to force iTunes to return high-resolution 600px album covers.
-- The `Song[]` array is returned to the state manager and the game begins.
+---
+
+## 2. On-the-Fly Year Lookup
+
+During the transition from the `PASS_DEVICE` screen to the `QUIZ` screen, the application performs an asynchronous fetch using `fetchTrackYear(trackId, title, artist)` to find the original release year:
+
+1. **Query Formulation**:
+   The query is formed by combining the cleaned artist name (stripped of features) and the cleaned song title (e.g. `"Journey Don't Stop Believin'"`).
+
+2. **Cascading Proxy Strategy**:
+   The app tries the following endpoints in order:
+   - **Local Dev Proxy**: `/api-itunes/search?...` (used in development)
+   - **Local PHP Proxy**: `./proxy.php?...` (used in PHP-enabled hosting environments)
+   - **AllOrigins Proxy**: `https://api.allorigins.win/raw?url=...` (free CORS proxy fallback)
+   - **Deezer Fallback**: `https://api.deezer.com/track/{trackId}` (metadata lookup if iTunes search fails)
+
+3. **Date Validation & Regex Extraction (`getYearFromString`)**:
+   To prevent `"NaN"` or invalid years, the returned string is parsed:
+   - If the date is valid, it extracts the year using `getFullYear()`.
+   - If date parsing fails or is outside the range `[1900, currentYear + 2]`, it runs a fallback regex `\b(19\d\d|20\d\d)\b` to extract any 4-digit year.
+   - If all lookups fail, it returns the current calendar year as a safe fallback.

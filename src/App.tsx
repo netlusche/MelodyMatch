@@ -60,13 +60,8 @@ const MainApp: React.FC = () => {
       {state.phase !== 'SETUP' && (
         <button 
           onClick={() => dispatch({type: 'RESET_GAME'})} 
-          style={{ 
-            position: 'fixed', bottom: '1rem', right: '1rem', 
-            background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', 
-            color: 'var(--text-muted)', fontSize: '0.75rem', 
-            textDecoration: 'none', cursor: 'pointer', padding: '0.4rem 0.8rem', borderRadius: '12px',
-            zIndex: 100
-          }}>
+          className="start-over-btn"
+        >
           {t.startOver}
         </button>
       )}

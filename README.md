@@ -1,14 +1,18 @@
 # MelodyMatch
 
-A fast-paced, interactive, modern local-multiplayer music quiz built with React, Vite, and the iTunes API.
+A fast-paced, interactive, modern local-multiplayer music quiz built with React, Vite, and the Deezer & iTunes APIs.
 
 ## Features
-- **Real iTunes Music**: Plays real song snippets directly from the iTunes Search API using a robust, multi-layer proxy architecture that bypasses CORS and browser tracking/ad-blocker restrictions.
-- **Safari Autoplay Unlock**: Centralized web audio registry that unlocks browser-level audio restrictions on the very first user interaction, ensuring previews play seamlessly on iOS Safari.
-- **Dynamic Options**: Vast 100-song multiple-choice option arrays guarantee variety across any selected round length.
-- **Flawless Integrity**: Deep RegExp string cross-referencing algorithms explicitly obliterate duplicate tracks natively hidden across different iTunes compilation records.
-- **Regions**: Deeply localized (EN/DE) setup and fully localized native API queries, injecting region-specific genres (e.g., *Schlager*, *Neue Deutsche Welle*, *Ballermann*) directly into German clients.
-- **Aesthetic**: Gorgeous glowing glassmorphic components and `canvas-confetti` fireworks engine for a premium presentation.
+- **Direct Music Previews**: Plays track snippets directly from the **Deezer API**. Since it uses client-side JSONP (`output=jsonp`), it completely bypasses CORS restrictions directly in the browser without requiring any proxy servers or backend redirections.
+- **Curated Playlists & Charts**: 
+  - Selecting **Charts** pulls directly from Deezer's global top hits.
+  - Selecting sub-genres (e.g. *Indie*, *Classic Rock*, *Schlager*, *NDW*, *Deutschpop*, *Deutscher Rap*, *Ballermann*, *New Wave / Post-Punk*, *Partyhits*) fetches songs directly from top curated editorial playlists rather than text searches. This guarantees genuine genre hits and completely avoids search pollution.
+- **Original Release Year Lookup**: To prevent remastered or compilation album dates (e.g. Journey's *Don't Stop Believin'* showing 2001 instead of 1981), the app queries the **iTunes Search API** on-the-fly for the original track release date. It cascades through local dev proxy, `proxy.php`, AllOrigins, and falls back to Deezer.
+- **Global Title & Text Sanitization**: Suffixes like `(Remastered)`, `(2001 Remaster)`, `[Live]`, or `(Rerecorded)` are automatically stripped globally, ensuring clean titles are displayed in the UI and multiple-choice distractor options.
+- **Double-Click & Rapid-Tap Protection**: State transition buttons and multiple-choice answer grids are guarded against rapid consecutive taps, preventing accidental step skips or out-of-sync audio queues.
+- **Safari Autoplay Unlock**: Synchronously anchors the audio play promise to the user gesture (e.g., clicking "Begin Turn"), ensuring audio previews play instantly on iOS Safari.
+- **Multi-Theme System**: Easily switch between **Default (Neon Party)**, **Plain White (Light Mode with high-contrast accessibility)**, and **Plain Dark (Dark Mode)** right from the setup screen.
+- **Localization**: Full English (EN) and German (DE) localization, including region-specific genre configurations.
 
 ## Usage
 
@@ -17,34 +21,17 @@ A fast-paced, interactive, modern local-multiplayer music quiz built with React,
 npm install
 npm run dev
 ```
-*(Runs a dev server with a built-in proxy mapping `/api-itunes` to `https://itunes.apple.com` to prevent CORS issues.)*
+*(Runs the Vite dev server at http://localhost:5173 with a local dev proxy config to ease iTunes search requests.)*
 
 ### Production Build & Deployment
 ```bash
 npm run build
 ```
-The compiled files are generated in the `dist/` directory. Due to CORS constraints and iOS Safari security policies blocking JSONP script execution, API queries must be proxied. Choose one of the following deployment options:
+The compiled static bundle is generated in the `dist/` directory.
 
-1. **PHP Web Hosting (Strato, IONOS, cPanel, etc.)**:
-   Upload the entire contents of the `dist/` folder. The app will automatically use the included `proxy.php` to fetch iTunes data server-side.
-2. **Netlify**:
-   Deploy the project repository. The included `public/_redirects` file automatically maps the API route `/api-itunes/*` to the iTunes API.
-3. **Vercel**:
-   Deploy the project repository. The included `vercel.json` file configures the rewrite proxy automatically.
-4. **Nginx / Apache (Static without PHP)**:
-   Configure a reverse proxy on your server:
-   * **Nginx**:
-     ```nginx
-     location /api-itunes/ {
-         proxy_pass https://itunes.apple.com/;
-         proxy_ssl_server_name on;
-     }
-     ```
-   * **Apache (`.htaccess`)**:
-     ```apache
-     RewriteEngine On
-     RewriteRule ^api-itunes/(.*) https://itunes.apple.com/$1 [P,L]
-     ```
+Because the Deezer song fetches use client-side JSONP, **the application can be hosted on any purely static web server** (including Strato, IONOS, cPanel, GitHub Pages, Netlify, Vercel, etc.) and it will work immediately out of the box!
+- The iTunes year-lookup cascades through client-side options (AllOrigins CORS proxy and Deezer fallback), meaning **no server-side proxies or backend rewrites are required for the game to function**.
+- Optionally, if you host on a PHP-enabled server, the included `proxy.php` will be used to proxy iTunes year queries. On Vercel or Netlify, the included rewrite rules in `vercel.json` and `_redirects` will be automatically active.
 
 ## License
-Released gracefully under the GPL-3.0 License.
+Released under the GPL-3.0 License.

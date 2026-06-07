@@ -8,6 +8,7 @@ const BASE_GENRES = [
   { id: 'pop', label: 'Pop' },
   { id: 'rock', label: 'Rock' },
   { id: 'indie', label: 'Indie' },
+  { id: 'new wave', label: 'New Wave / Post-Punk' },
   { id: 'hip-hop', label: 'Hip-Hop' },
   { id: 'electronic', label: 'Electronic' },
   { id: 'r&b', label: 'R&B' },
@@ -31,8 +32,8 @@ export const GenreScreen: React.FC = () => {
   const t = translations[state.lang as keyof typeof translations] || translations.en;
   
   const availableGenres = state.lang === 'de'
-    ? [{ id: 'all', label: 'Alle Genres' }, ...BASE_GENRES, ...DE_EXTRAS]
-    : [{ id: 'all', label: 'All Genres' }, ...BASE_GENRES];
+    ? [{ id: 'all', label: 'Charts' }, ...BASE_GENRES, ...DE_EXTRAS]
+    : [{ id: 'all', label: 'Charts' }, ...BASE_GENRES];
 
   const [selectedGenres, setSelectedGenres] = useState<string[]>(state.genres || ['all']);
   const [isLoading, setIsLoading] = useState(false);

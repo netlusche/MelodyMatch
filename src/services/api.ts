@@ -1,7 +1,30 @@
 import { Song } from '../types';
 import { normalizeString } from '../utils/stringUtils';
 
-const SEARCH_TERMS = ['pop', 'rock', 'party', '90s', '2000s hits', 'dance', 'chart hits'];
+const GENRE_MAP: Record<string, number> = {
+  'pop': 132,
+  'rock': 152,
+  'hip-hop': 116,
+  'electronic': 106, // Electro
+  'r&b': 165,        // R&B
+  'alternative': 85, // Alternative
+  'heavy metal': 464, // Heavy Metal
+};
+
+const PLAYLIST_MAP: Record<string, number | number[]> = {
+  'indie': 9372936102, // The Indie Café
+  'classic rock': 6046721604, // Rock Klassiker
+  'schlager': 8699026122, // Schlager Hits
+  'ndw': 6758361584, // Neue Deutsche Welle
+  'deutschpop': 11242422704, // Deutschpop Hits
+  'deutschrock': 1956739222, // Deutschrock
+  'deutscher rap': 10578289242, // Deutscher Rap Hits
+  'ballermann': 10328601542, // Ballermann Party Hits
+  'partyhits': 2097558104, // Party Hits
+  'new wave': [8515679522, 8700369282], // New Wave Essentials & Post-Punk Essentials
+};
+
+const SEARCH_TERMS = ['pop music', 'rock music', 'party hits', '90s hits', '2000s hits', 'dance music', 'chart hits'];
 
 /**
  * Custom JSONP fetcher for Deezer API.
@@ -50,18 +73,112 @@ const fetchDeezerJsonp = (url: string): Promise<any> => {
   });
 };
 
+const getYearFromString = (dateStr: string): string | null => {
+  if (!dateStr) return null;
+  const parsed = new Date(dateStr).getFullYear();
+  if (isNaN(parsed) || parsed < 1900 || parsed > new Date().getFullYear() + 2) {
+    // Regex fallback to find any 4-digit year starting with 19 or 20
+    const match = dateStr.match(/\b(19\d\d|20\d\d)\b/);
+    return match ? match[1] : null;
+  }
+  return parsed.toString();
+};
+
+export const cleanSongTitle = (title: string): string => {
+  if (!title) return "";
+  let clean = title
+    .replace(/\(.*?(remaster|live|edit|version|mono|stereo|anniversary|deluxe|mix|remix|re-?recorded|recorded).*?\)/gi, '')
+    .replace(/\[.*?(remaster|live|edit|version|mono|stereo|anniversary|deluxe|mix|remix|re-?recorded|recorded).*?\]/gi, '')
+    .replace(/\s+-\s+.*?(remaster|live|edit|version|mono|stereo|anniversary|deluxe|mix|remix|re-?recorded|recorded).*?$/gi, '')
+    .trim();
+  return clean || title;
+};
+
+const cleanQueryForYearSearch = (artist: string, title: string): string => {
+  const cleanTitle = cleanSongTitle(title);
+  // Strip featuring artist suffixes
+  const cleanArtist = artist.replace(/\s+(feat|ft)\.?\s+.*$/gi, '').trim();
+
+  return `${cleanArtist} ${cleanTitle}`;
+};
+
 /**
  * Fetches the exact release year of a track on-the-fly.
+ * It queries the iTunes API (via local dev proxy, local PHP proxy, or AllOrigins CORS proxy)
+ * because iTunes accurately tracks and returns the *original* release year of a song
+ * even when it is hosted on a compilation or remastered album.
+ * Falls back to Deezer track metadata if iTunes queries fail.
  */
-export const fetchTrackYear = async (trackId: number): Promise<string> => {
+export const fetchTrackYear = async (trackId: number, title: string, artist: string): Promise<string> => {
+  const query = cleanQueryForYearSearch(artist, title);
+  const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&limit=1`;
+  
+  // 1. Try local dev proxy (/api-itunes)
+  const devUrl = `/api-itunes/search?term=${encodeURIComponent(query)}&media=music&limit=1`;
+  try {
+    const res = await fetch(devUrl);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.results && data.results[0] && data.results[0].releaseDate) {
+        const year = getYearFromString(data.results[0].releaseDate);
+        if (year) {
+          console.log(`Fetched original year via dev proxy for "${query}":`, year);
+          return year;
+        }
+      }
+    }
+  } catch (e) {
+    // Expected to fail in production
+  }
+
+  // 2. Try local PHP proxy (proxy.php) if available (for Strato production)
+  try {
+    const res = await fetch(`./proxy.php?term=${encodeURIComponent(query)}&media=music&limit=1`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.results && data.results[0] && data.results[0].releaseDate) {
+        const year = getYearFromString(data.results[0].releaseDate);
+        if (year) {
+          console.log(`Fetched original year via local PHP proxy for "${query}":`, year);
+          return year;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Local PHP proxy failed for year fetch:", e);
+  }
+
+  // 3. Try AllOrigins raw proxy
+  try {
+    const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(itunesUrl)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.results && data.results[0] && data.results[0].releaseDate) {
+        const year = getYearFromString(data.results[0].releaseDate);
+        if (year) {
+          console.log(`Fetched original year via AllOrigins for "${query}":`, year);
+          return year;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("AllOrigins proxy failed for year fetch:", e);
+  }
+
+  // 4. Fallback: Fetch Deezer track details (might be compilation year, but safe fallback)
   try {
     const data = await fetchDeezerJsonp(`https://api.deezer.com/track/${trackId}`);
     if (data && data.release_date) {
-      return new Date(data.release_date).getFullYear().toString();
+      const year = getYearFromString(data.release_date);
+      if (year) {
+        console.log(`Fetched fallback year via Deezer for "${query}":`, year);
+        return year;
+      }
     }
   } catch (e) {
-    console.error(`Failed to fetch track details for ID ${trackId} via JSONP:`, e);
+    console.error("Deezer year fetch failed:", e);
   }
+
   return new Date().getFullYear().toString(); // safe fallback
 };
 
@@ -70,7 +187,7 @@ export const fetchSongs = async (count: number, genres: string[] = ['all']): Pro
     let termsToSearch: string[] = [];
     
     if (genres.includes('all') || genres.length === 0) {
-      termsToSearch = [SEARCH_TERMS[Math.floor(Math.random() * SEARCH_TERMS.length)]];
+      termsToSearch = ['all'];
     } else {
       termsToSearch = genres;
     }
@@ -78,19 +195,36 @@ export const fetchSongs = async (count: number, genres: string[] = ['all']): Pro
     const resultsArray = [];
     for (const term of termsToSearch) {
       try {
-        let query = term;
-        if (term === 'ndw') {
-          query = 'neue deutsche welle';
-        } else if (term === 'deutscher rap') {
-          query = 'deutscher rap';
-        }
-        
-        const limit = 100;
-        const url = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=${limit}`;
-        const data = await fetchDeezerJsonp(url);
-        
-        if (data && data.data) {
-          resultsArray.push(data.data);
+        if (term === 'all') {
+          // Global top tracks chart
+          const url = `https://api.deezer.com/chart/0/tracks?limit=300`;
+          const data = await fetchDeezerJsonp(url);
+          if (data && data.data) resultsArray.push(data.data);
+        } else if (GENRE_MAP[term] !== undefined) {
+          // Genre specific chart to get popular songs instead of literal search matches
+          const url = `https://api.deezer.com/chart/${GENRE_MAP[term]}/tracks?limit=300`;
+          const data = await fetchDeezerJsonp(url);
+          if (data && data.data) resultsArray.push(data.data);
+        } else if (PLAYLIST_MAP[term] !== undefined) {
+          // Curated playlist for sub-genres and specific categories (supports single ID or array)
+          const val = PLAYLIST_MAP[term];
+          const playlistIds = Array.isArray(val) ? val : [val];
+          for (const pid of playlistIds) {
+            try {
+              const url = `https://api.deezer.com/playlist/${pid}/tracks?limit=300`;
+              const data = await fetchDeezerJsonp(url);
+              if (data && data.data) {
+                resultsArray.push(data.data);
+              }
+            } catch (e) {
+              console.error("Deezer playlist fetch failed for pid:", pid, e);
+            }
+          }
+        } else {
+          // Fallback search
+          const url = `https://api.deezer.com/search?q=${encodeURIComponent(term)}&limit=300`;
+          const data = await fetchDeezerJsonp(url);
+          if (data && data.data) resultsArray.push(data.data);
         }
       } catch (e) {
         console.error("Deezer fetch failed for term", term, e);
@@ -117,7 +251,7 @@ export const fetchSongs = async (count: number, genres: string[] = ['all']): Pro
     // Map to our Song type
     return shuffled.slice(0, count).map((t: any) => ({
       id: t.id,
-      title: t.title,
+      title: cleanSongTitle(t.title),
       artist: t.artist.name,
       // Left blank during pool fetch, loaded on-the-fly on BEGIN_TURN
       year: '', 

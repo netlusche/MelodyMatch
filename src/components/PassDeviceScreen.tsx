@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGame } from '../state/GameContext';
 import { translations } from '../i18n/translations';
-import { Smartphone, Play } from 'lucide-react';
+import { Smartphone, Play, Loader2 } from 'lucide-react';
 import { normalizeString } from '../utils/stringUtils';
 import { audioManager } from '../services/audio';
 import { fetchTrackYear } from '../services/api';
@@ -10,8 +10,12 @@ export const PassDeviceScreen: React.FC = () => {
   const { state, dispatch } = useGame();
   const t = translations[state.lang as keyof typeof translations] || translations.en;
   const currentPlayer = state.players[state.currentPlayerIndex];
+  const [isBeginning, setIsBeginning] = useState(false);
 
   const handleBeginTurn = () => {
+    if (isBeginning) return;
+    setIsBeginning(true);
+
     const playedKeys = new Set(
       state.history.map((s: any) => `${normalizeString(s.title)}-${normalizeString(s.artist)}`)
     );
@@ -38,7 +42,7 @@ export const PassDeviceScreen: React.FC = () => {
       
     // Fetch the correct release year in the background, then transition the phase
     if (randomSong.id && randomSong.id !== 1) {
-      fetchTrackYear(randomSong.id).then((year) => {
+      fetchTrackYear(randomSong.id, randomSong.title, randomSong.artist).then((year) => {
         dispatch({ 
           type: 'BEGIN_TURN', 
           payload: { song: { ...randomSong, year } } 
@@ -71,9 +75,17 @@ export const PassDeviceScreen: React.FC = () => {
       <h1 className="title-gradient gigantic text-center">{currentPlayer.name}</h1>
       
       <div className="mt-8 w-full max-w-sm">
-        <button className="option-button primary large w-full pulse-animation" onClick={handleBeginTurn}>
-          <Play fill="currentColor" size={24} /> 
-          <span>{t.beginTurn}</span>
+        <button 
+          className="option-button primary large w-full pulse-animation" 
+          onClick={handleBeginTurn}
+          disabled={isBeginning}
+        >
+          {isBeginning ? (
+            <Loader2 className="icon" size={24} style={{ animation: 'spin 2s linear infinite' }} />
+          ) : (
+            <Play fill="currentColor" size={24} />
+          )}
+          <span>{isBeginning ? 'Loading...' : t.beginTurn}</span>
         </button>
       </div>
     </div>
