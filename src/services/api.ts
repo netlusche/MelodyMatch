@@ -3,17 +3,51 @@ import { normalizeString } from '../utils/stringUtils';
 
 const SEARCH_TERMS = ['pop', 'rock', 'party', '90s', '2000s hits', 'dance', 'chart hits'];
 
-const fetchWithTimeout = async (url: string, options = {}, timeout = 8000) => {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-  try {
-    const response = await fetch(url, { ...options, signal: controller.signal });
-    clearTimeout(id);
-    return response;
-  } catch (error) {
-    clearTimeout(id);
-    throw error;
-  }
+/**
+ * Custom JSONP fetcher for Deezer API.
+ * Bypasses CORS completely directly in the client.
+ */
+const fetchDeezerJsonp = (url: string): Promise<any> => {
+  const callbackName = 'deezer_callback_' + Math.round(100000 * Math.random());
+  return new Promise((resolve, reject) => {
+    const hasParams = url.includes('?');
+    // Deezer uses output=jsonp to trigger JSONP response mode
+    const jsonpUrl = `${url}${hasParams ? '&' : '?'}output=jsonp&callback=${callbackName}`;
+    
+    const script = document.createElement('script');
+    script.src = jsonpUrl;
+    script.async = true;
+    
+    const timeoutId = setTimeout(() => {
+      cleanup();
+      reject(new Error(`Deezer JSONP timed out for url: ${url}`));
+    }, 8000);
+
+    (window as any)[callbackName] = (data: any) => {
+      clearTimeout(timeoutId);
+      if (data && data.error) {
+        reject(new Error(data.error.message || "Deezer API Error"));
+      } else {
+        resolve(data);
+      }
+      cleanup();
+    };
+    
+    script.onerror = () => {
+      clearTimeout(timeoutId);
+      reject(new Error(`Deezer JSONP load failed for url: ${url}`));
+      cleanup();
+    };
+    
+    const cleanup = () => {
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+      delete (window as any)[callbackName];
+    };
+    
+    document.body.appendChild(script);
+  });
 };
 
 /**
@@ -21,18 +55,14 @@ const fetchWithTimeout = async (url: string, options = {}, timeout = 8000) => {
  */
 export const fetchTrackYear = async (trackId: number): Promise<string> => {
   try {
-    const res = await fetchWithTimeout(`https://api.deezer.com/track/${trackId}`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.release_date) {
-        return new Date(data.release_date).getFullYear().toString();
-      }
+    const data = await fetchDeezerJsonp(`https://api.deezer.com/track/${trackId}`);
+    if (data && data.release_date) {
+      return new Date(data.release_date).getFullYear().toString();
     }
   } catch (e) {
-    console.error(`Failed to fetch track details for ID ${trackId}:`, e);
+    console.error(`Failed to fetch track details for ID ${trackId} via JSONP:`, e);
   }
-  // Return current year as a safe fallback if fetch fails
-  return new Date().getFullYear().toString();
+  return new Date().getFullYear().toString(); // safe fallback
 };
 
 export const fetchSongs = async (count: number, genres: string[] = ['all']): Promise<Song[]> => {
@@ -48,7 +78,6 @@ export const fetchSongs = async (count: number, genres: string[] = ['all']): Pro
     const resultsArray = [];
     for (const term of termsToSearch) {
       try {
-        // Map specific search terms to improve search quality on Deezer
         let query = term;
         if (term === 'ndw') {
           query = 'neue deutsche welle';
@@ -56,16 +85,15 @@ export const fetchSongs = async (count: number, genres: string[] = ['all']): Pro
           query = 'deutscher rap';
         }
         
-        const limit = 100; // Limit per search term query
+        const limit = 100;
         const url = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=${limit}`;
-        const res = await fetchWithTimeout(url);
+        const data = await fetchDeezerJsonp(url);
         
-        if (res.ok) {
-          const data = await res.json();
-          resultsArray.push(data.data || []);
+        if (data && data.data) {
+          resultsArray.push(data.data);
         }
       } catch (e) {
-        console.error("Fetch failed for term", term, e);
+        console.error("Deezer fetch failed for term", term, e);
       }
     }
 
@@ -91,7 +119,7 @@ export const fetchSongs = async (count: number, genres: string[] = ['all']): Pro
       id: t.id,
       title: t.title,
       artist: t.artist.name,
-      // Left blank during pool fetch, will be loaded on-the-fly when round starts
+      // Left blank during pool fetch, loaded on-the-fly on BEGIN_TURN
       year: '', 
       previewUrl: t.preview,
       artworkUrl: t.album.cover_big,
