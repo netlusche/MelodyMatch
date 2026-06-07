@@ -1,5 +1,6 @@
 import { Song } from '../types';
 import { normalizeString } from '../utils/stringUtils';
+import { shuffleArray } from '../utils/arrayUtils';
 
 const GENRE_MAP: Record<string, number> = {
   'pop': 132,
@@ -307,7 +308,7 @@ export const fetchSongs = async (count: number, genres: string[] = ['all']): Pro
     });
     
     // Shuffle the tracks
-    const shuffled = validTracks.sort(() => 0.5 - Math.random());
+    const shuffled = shuffleArray(validTracks);
     
     // Map to our Song type
     return shuffled.slice(0, count).map((t: any) => ({

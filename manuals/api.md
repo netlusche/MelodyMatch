@@ -31,7 +31,7 @@ When the user configures the game and clicks "Start Game", the application gathe
    - External queries are clean and match original releases.
 
 4. **Deduplication & Shuffle**:
-   Tracks are normalized to an alphanumeric title-artist key to discard duplicates (e.g. from overlapping genre charts). The remaining tracks are shuffled and sliced to the requested pool size (e.g. 100).
+   Tracks are normalized to an alphanumeric title-artist key to discard duplicates (e.g. from overlapping genre charts). The remaining tracks are shuffled using an unbiased **Fisher-Yates shuffle** algorithm (`shuffleArray`) to ensure a completely uniform distribution, preventing any single selected genre from dominating the final sliced song pool (e.g., 100 songs).
 
 ---
 

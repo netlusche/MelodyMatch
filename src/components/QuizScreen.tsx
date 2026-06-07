@@ -4,6 +4,7 @@ import { translations } from '../i18n/translations';
 import { QuestionStep } from '../types';
 import { Disc, PlayCircle, PauseCircle } from 'lucide-react';
 import { normalizeString } from '../utils/stringUtils';
+import { shuffleArray } from '../utils/arrayUtils';
 import { audioManager } from '../services/audio';
 
 // Generates 3 random wrong answers
@@ -67,11 +68,11 @@ const getOptions = (correct: string, pool: any[], field: string) => {
   }
   
   // shuffle others, take 3
-  others.sort(() => 0.5 - Math.random());
-  const selected = others.slice(0, 3);
+  const shuffledOthers = shuffleArray(others);
+  const selected = shuffledOthers.slice(0, 3);
   selected.push(correct);
   // shuffle all 4
-  return selected.sort(() => 0.5 - Math.random());
+  return shuffleArray(selected);
 };
 
 export const QuizScreen: React.FC = () => {
