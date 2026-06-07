@@ -665,15 +665,202 @@ body {
   --row-bg: rgba(210, 100, 140, 0.05);
 }
 
-/* Light theme legibility improvements (Plain White & Sakura) */
+.theme-lcars {
+  /* Star Trek LCARS Theme */
+  --primary: #ff9900;
+  --primary-hover: #e58a00;
+  --secondary: #99ccff;
+  --bg: #000000;
+  --bg-image: none;
+  --card: #111111;
+  --card-hover: #1e1e1e;
+  --text: #ffffff;
+  --text-muted: #ffcc00;
+  --danger: #ff3333;
+  --success: #00ff66;
+  --gold: #ffcc00;
+  --border: rgba(255, 153, 0, 0.4);
+  --border-hover: rgba(255, 153, 0, 0.7);
+  --glow-primary: rgba(255, 153, 0, 0.35);
+  --glow-success: rgba(0, 255, 102, 0.35);
+  --glow-danger: rgba(255, 51, 51, 0.35);
+  --glow-gold: rgba(255, 204, 0, 0.35);
+  --badge-bg: rgba(255, 153, 0, 0.1);
+  --badge-border: rgba(255, 153, 0, 0.25);
+  --row-bg: rgba(255, 153, 0, 0.08);
+}
+
+.theme-lcars #root {
+  padding-top: 3.25rem;
+  padding-bottom: 3.25rem;
+  padding-left: 2.75rem;
+}
+
+.theme-frutiger_aero {
+  /* Frutiger Aero Theme (Light) */
+  --primary: #02a8f3;
+  --primary-hover: #028ecf;
+  --secondary: #76b82a;
+  --bg: #e6f4fc;
+  --bg-image: linear-gradient(180deg, #d2ecf9 0%, #edf7f6 100%);
+  --card: rgba(255, 255, 255, 0.75);
+  --card-hover: rgba(255, 255, 255, 0.9);
+  --text: #003366;
+  --text-muted: #4f8ab0;
+  --danger: #e02444;
+  --success: #1f9e2b;
+  --gold: #b45309;
+  --border: rgba(2, 168, 243, 0.25);
+  --border-hover: rgba(2, 168, 243, 0.45);
+  --glow-primary: rgba(2, 168, 243, 0.1);
+  --glow-success: rgba(31, 158, 43, 0.1);
+  --glow-danger: rgba(224, 36, 68, 0.1);
+  --glow-gold: rgba(180, 83, 9, 0.1);
+  --badge-bg: rgba(2, 168, 243, 0.08);
+  --badge-border: rgba(2, 168, 243, 0.2);
+  --row-bg: rgba(118, 184, 42, 0.06);
+}
+
+.theme-synthwave {
+  /* Synthwave Sunset Theme */
+  --primary: #ff007f;
+  --primary-hover: #d40069;
+  --secondary: #00f0ff;
+  --bg: #0d0216;
+  --bg-image: linear-gradient(180deg, #0d0216 0%, #220336 100%);
+  --card: rgba(30, 8, 48, 0.75);
+  --card-hover: rgba(48, 12, 77, 0.85);
+  --text: #ffffff;
+  --text-muted: #ff00ff;
+  --danger: #ff2255;
+  --success: #00f0ff;
+  --gold: #ffe600;
+  --border: rgba(0, 240, 255, 0.3);
+  --border-hover: rgba(0, 240, 255, 0.5);
+  --glow-primary: rgba(255, 0, 127, 0.5);
+  --glow-success: rgba(0, 240, 255, 0.5);
+  --glow-danger: rgba(255, 34, 85, 0.5);
+  --glow-gold: rgba(255, 230, 0, 0.5);
+  --badge-bg: rgba(255, 0, 127, 0.1);
+  --badge-border: rgba(255, 0, 127, 0.25);
+  --row-bg: rgba(0, 240, 255, 0.07);
+}
+
+.theme-heavy_metal {
+  /* Heavy Metal Theme (Dark) */
+  --primary: #990000;
+  --primary-hover: #730000;
+  --secondary: #555555;
+  --bg: #050505;
+  --bg-image: none;
+  --card: #121212;
+  --card-hover: #1c1c1c;
+  --text: #dddddd;
+  --text-muted: #888888;
+  --danger: #cc0000;
+  --success: #33cc66;
+  --gold: #ffaa00;
+  --border: rgba(255, 0, 0, 0.15);
+  --border-hover: rgba(255, 0, 0, 0.35);
+  --glow-primary: rgba(153, 0, 0, 0.35);
+  --glow-success: rgba(51, 204, 102, 0.3);
+  --glow-danger: rgba(204, 0, 0, 0.35);
+  --glow-gold: rgba(255, 170, 0, 0.3);
+  --badge-bg: rgba(255, 255, 255, 0.03);
+  --badge-border: rgba(255, 255, 255, 0.08);
+  --row-bg: rgba(255, 0, 0, 0.04);
+}
+
+.theme-post_punk {
+  /* Post Punk Theme (Minimalist) */
+  --primary: #ffffff;
+  --primary-hover: #e2e2e5;
+  --secondary: #7f0000;
+  --bg: #0b0b0c;
+  --bg-image: none;
+  --card: #141416;
+  --card-hover: #1f1f22;
+  --text: #e2e2e5;
+  --text-muted: #727278;
+  --danger: #cf2a2a;
+  --success: #38b000;
+  --gold: #ffffff;
+  --border: rgba(255, 255, 255, 0.12);
+  --border-hover: rgba(255, 255, 255, 0.28);
+  --glow-primary: rgba(255, 255, 255, 0.2);
+  --glow-success: rgba(56, 176, 0, 0.2);
+  --glow-danger: rgba(207, 42, 42, 0.2);
+  --glow-gold: rgba(255, 255, 255, 0.2);
+  --badge-bg: rgba(255, 255, 255, 0.04);
+  --badge-border: rgba(255, 255, 255, 0.1);
+  --row-bg: rgba(255, 255, 255, 0.04);
+}
+
+.theme-rock_legends {
+  /* Rock Legends Theme (Stage Amber) */
+  --primary: #ffaa00;
+  --primary-hover: #cc8800;
+  --secondary: #ff5500;
+  --bg: #060608;
+  --bg-image: none;
+  --card: #131317;
+  --card-hover: #1d1d24;
+  --text: #f5f5f7;
+  --text-muted: #8c8c9a;
+  --danger: #e02e2e;
+  --success: #2ec46b;
+  --gold: #ffaa00;
+  --border: rgba(255, 170, 0, 0.2);
+  --border-hover: rgba(255, 170, 0, 0.4);
+  --glow-primary: rgba(255, 170, 0, 0.45);
+  --glow-success: rgba(46, 196, 107, 0.4);
+  --glow-danger: rgba(224, 46, 46, 0.4);
+  --glow-gold: rgba(255, 170, 0, 0.45);
+  --badge-bg: rgba(255, 170, 0, 0.08);
+  --badge-border: rgba(255, 170, 0, 0.2);
+  --row-bg: rgba(255, 170, 0, 0.05);
+}
+
+.theme-kraftwerk {
+  /* Kraftwerk Theme (Synthesizer Red/Man-Machine) */
+  --primary: #ff0033;
+  --primary-hover: #cc0029;
+  --secondary: #ffffff;
+  --bg: #020202;
+  --bg-image: none;
+  --card: #0d0d0d;
+  --card-hover: #171717;
+  --text: #ffffff;
+  --text-muted: #ff0033;
+  --danger: #ff0033;
+  --success: #ff0033;
+  --gold: #ffffff;
+  --border: rgba(255, 0, 51, 0.25);
+  --border-hover: rgba(255, 0, 51, 0.5);
+  --glow-primary: rgba(255, 0, 51, 0.45);
+  --glow-success: rgba(255, 0, 51, 0.45);
+  --glow-danger: rgba(255, 0, 51, 0.45);
+  --glow-gold: rgba(255, 255, 255, 0.45);
+  --badge-bg: rgba(255, 0, 51, 0.08);
+  --badge-border: rgba(255, 0, 51, 0.2);
+  --row-bg: rgba(255, 0, 51, 0.06);
+}
+
+/* Light theme legibility improvements (Plain White, Sakura, Frutiger Aero) */
 .theme-plain_white .glow-text,
-.theme-sakura .glow-text {
+.theme-sakura .glow-text,
+.theme-frutiger_aero .glow-text {
   text-shadow: none;
 }
 
 .theme-sakura .leaderboard-row.first-place {
   background: linear-gradient(to right, rgba(212, 68, 120, 0.06), var(--card));
   border-color: rgba(212, 68, 120, 0.25);
+}
+
+.theme-frutiger_aero .leaderboard-row.first-place {
+  background: linear-gradient(to right, rgba(2, 168, 243, 0.06), var(--card));
+  border-color: rgba(2, 168, 243, 0.25);
 }
 
 /* ────────────────────────────────────────────────────────
@@ -837,6 +1024,15 @@ body {
   background: rgba(0, 0, 0, 0.05) !important;
 }
 .theme-plain_white .theme-dropdown-item.active:hover {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+
+/* Light theme (frutiger_aero) dropdown item hover adjustment */
+.theme-frutiger_aero .theme-dropdown-item:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+.theme-frutiger_aero .theme-dropdown-item.active:hover {
   background: var(--primary) !important;
   color: #fff !important;
 }

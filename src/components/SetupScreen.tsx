@@ -146,6 +146,13 @@ export const SetupScreen: React.FC = () => {
               {state.theme === 'vaporwave' && 'Vaporwave'}
               {state.theme === 'westeros' && 'Westeros'}
               {state.theme === 'sakura' && 'Sakura'}
+              {state.theme === 'lcars' && 'LCARS'}
+              {state.theme === 'frutiger_aero' && 'Frutiger Aero'}
+              {state.theme === 'synthwave' && 'Synthwave'}
+              {state.theme === 'heavy_metal' && 'Heavy Metal'}
+              {state.theme === 'post_punk' && 'Post Punk'}
+              {state.theme === 'rock_legends' && 'Rock Legends'}
+              {state.theme === 'kraftwerk' && 'Kraftwerk'}
               {(state.theme === 'default' || !state.theme) && 'Default'}
             </span>
             {themeDropdownOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -164,7 +171,7 @@ export const SetupScreen: React.FC = () => {
                 borderRadius: '12px',
                 boxShadow: '0 10px 25px rgba(0,0,0,0.3), 0 0 0 1px var(--border)',
                 zIndex: 1000,
-                width: '140px',
+                width: '150px',
                 maxHeight: '180px',
                 overflowY: 'auto',
                 display: 'flex',
@@ -180,7 +187,14 @@ export const SetupScreen: React.FC = () => {
                 { value: 'matrix', label: 'Matrix' },
                 { value: 'vaporwave', label: 'Vaporwave' },
                 { value: 'westeros', label: 'Westeros' },
-                { value: 'sakura', label: 'Sakura' }
+                { value: 'sakura', label: 'Sakura' },
+                { value: 'lcars', label: 'LCARS' },
+                { value: 'frutiger_aero', label: 'Frutiger Aero' },
+                { value: 'synthwave', label: 'Synthwave' },
+                { value: 'heavy_metal', label: 'Heavy Metal' },
+                { value: 'post_punk', label: 'Post Punk' },
+                { value: 'rock_legends', label: 'Rock Legends' },
+                { value: 'kraftwerk', label: 'Kraftwerk' }
               ].map(t => {
                 const isActive = state.theme === t.value || (!state.theme && t.value === 'default');
                 return (
