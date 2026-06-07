@@ -3,6 +3,7 @@ import { useGame } from '../state/GameContext';
 import { translations } from '../i18n/translations';
 import { Smartphone, Play } from 'lucide-react';
 import { normalizeString } from '../utils/stringUtils';
+import { audioManager } from '../services/audio';
 
 export const PassDeviceScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -25,6 +26,13 @@ export const PassDeviceScreen: React.FC = () => {
     const randomSong = poolToUse.length > 0 
       ? poolToUse[Math.floor(Math.random() * poolToUse.length)]
       : { id: 1, title: 'Demo Song', artist: 'Demo Artist', year: '2023', previewUrl: '', artworkUrl: '' };
+
+    // Play the song immediately inside the user gesture handler to bypass browser autoplay blocks
+    if (randomSong.previewUrl) {
+      audioManager.playSong(randomSong.previewUrl).catch(err => {
+        console.warn("Autoplay initiation failed on user gesture:", err);
+      });
+    }
       
     dispatch({ 
       type: 'BEGIN_TURN', 

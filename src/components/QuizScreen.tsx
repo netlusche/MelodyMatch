@@ -1,9 +1,10 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useGame } from '../state/GameContext';
 import { translations } from '../i18n/translations';
 import { QuestionStep } from '../types';
 import { Disc, PlayCircle, PauseCircle } from 'lucide-react';
 import { normalizeString } from '../utils/stringUtils';
+import { audioManager } from '../services/audio';
 
 // Generates 3 random wrong answers
 const getOptions = (correct: string, pool: any[], field: string) => {
@@ -45,24 +46,21 @@ export const QuizScreen: React.FC = () => {
   const song = state.currentSong;
   const step = state.currentStep;
   
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  // Auto-play audio when component mounts or song changes
-  useEffect(() => {
-    if (audioRef.current && song?.previewUrl) {
-      audioRef.current.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
-    }
-  }, [song]);
+  const [isPlaying, setIsPlaying] = useState(!audioManager.getAudio().paused);
 
   const toggleAudio = () => {
-    if (!audioRef.current) return;
     if (isPlaying) {
-      audioRef.current.pause();
+      audioManager.pause();
+      setIsPlaying(false);
     } else {
-      audioRef.current.play();
+      const audio = audioManager.getAudio();
+      audio.play()
+        .then(() => setIsPlaying(true))
+        .catch(err => {
+          console.warn("Manual play failed:", err);
+          setIsPlaying(false);
+        });
     }
-    setIsPlaying(!isPlaying);
   };
 
   const options = useMemo(() => {
@@ -115,10 +113,7 @@ export const QuizScreen: React.FC = () => {
       <div className="text-muted mb-2 text-center text-sm font-bold glow-text w-full" style={{ fontSize: '1.1rem', marginTop: '-1rem' }}>
         {t.round} {state.currentRound} / {state.totalRounds}
       </div>
-      {/* Audio Element Hidden */}
-      {song.previewUrl && (
-        <audio ref={audioRef} src={song.previewUrl} loop />
-      )}
+      {/* Audio Element is managed globally by AudioManager */}
       
       <div className="music-player-ui primary-glow mb-6" style={{ padding: '0.5rem', borderRadius: '50%', background: 'var(--card)' }}>
         {song.artworkUrl ? (

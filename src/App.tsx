@@ -8,6 +8,8 @@ import { QuizScreen } from './components/QuizScreen';
 import { GenreScreen } from './components/GenreScreen';
 import { translations } from './i18n/translations';
 
+import { audioManager } from './services/audio';
+
 const MainContent: React.FC = () => {
   const { state } = useGame();
 
@@ -32,6 +34,20 @@ const MainContent: React.FC = () => {
 const MainApp: React.FC = () => {
   const { state, dispatch } = useGame();
   const t = translations[state.lang as keyof typeof translations] || translations.en;
+
+  React.useEffect(() => {
+    audioManager.registerUnlockListeners();
+  }, []);
+
+  React.useEffect(() => {
+    if (state.phase === 'QUIZ' && state.currentSong?.previewUrl) {
+      audioManager.playSong(state.currentSong.previewUrl).catch(err => {
+        console.warn("Root autoplay initiation failed:", err);
+      });
+    } else {
+      audioManager.stop();
+    }
+  }, [state.phase, state.currentSong]);
   
   return (
     <div style={{ position: 'relative', width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
