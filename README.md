@@ -11,7 +11,10 @@ A fast-paced, interactive, modern local-multiplayer music quiz built with React,
 - **Global Title & Text Sanitization**: Suffixes like `(Remastered)`, `(2001 Remaster)`, `[Live]`, or `(Rerecorded)` are automatically stripped globally, ensuring clean titles are displayed in the UI and multiple-choice distractor options.
 - **Double-Click & Rapid-Tap Protection**: State transition buttons and multiple-choice answer grids are guarded against rapid consecutive taps, preventing accidental step skips or out-of-sync audio queues.
 - **Safari Autoplay Unlock**: Synchronously anchors the audio play promise to the user gesture (e.g., clicking "Begin Turn"), ensuring audio previews play instantly on iOS Safari.
-- **Multi-Theme System**: Easily switch between **Default (Neon Party)**, **Plain White (Light Mode with high-contrast accessibility)**, and **Plain Dark (Dark Mode)** right from the setup screen.
+- **Expanded Theme System & Canvas Animation Effects**: Easily switch between seven visual themes: **Default (Neon Party)**, **Plain White (accessible light mode)**, **Plain Dark**, **Cyberpunk**, **Vaporwave**, **Westeros**, and **Sakura**. A high-performance fixed `<canvas>` background renders customized theme-specific animation loops (drifting neon particles, twinkling star fields, Matrix binary code streams, scrolling perspective grids, rising warm fire embers, or falling cherry blossom petals) that automatically respect system `prefers-reduced-motion` settings.
+- **Modern Theme Selector Dropdown**: Built a custom React-based dropdown selector replacing native pickers to ensure it always renders downwards (preventing clipping on mobile screens) and supports custom scrolling.
+- **Persistent Favorites Playlist ("Liked Songs")**: Save discovered songs to a local storage-backed playlist directly during turns or on the final results scoreboard. Features include in-app preview playing, Apple Music/Deezer search links, and clear-list utilities.
+- **Genre Selection Constraints & Alerts**: Matching the visual design of the active theme, the start button goes visually inactive when no genres are selected. Pressing it triggers a beautiful glassmorphism-styled warning modal prompting the user to select at least one genre.
 - **Localization**: Full English (EN) and German (DE) localization, including region-specific genre configurations.
 
 ## Usage
