@@ -9,17 +9,19 @@ To obtain original release years (rather than compilation release dates), the ap
 
 ## 1. Initial Song Pool Fetch
 
-When the user configures the game and clicks "Start Game", the application gathers the selected genres and calls `fetchSongs(count, genres)`:
+When the user configures the game and clicks "Start Game", the required song pool size is calculated dynamically based on player count and rounds: `Math.max(100, state.players.length * state.totalRounds + 10)`. The application gathers the selected genres/decades and calls `fetchSongs(count, genres)`:
 
-1. **Charts vs. Specific Genres**:
+1. **Charts vs. Specific Genres/Decades**:
    - If **Charts** (key: `'all'`) is selected, it queries Deezer's global charts:
      `https://api.deezer.com/chart/0/tracks?limit=300`
    - If a main genre (e.g., *Pop*, *Rock*, *Heavy Metal*) is selected, it queries the genre-specific chart using `GENRE_MAP`:
      `https://api.deezer.com/chart/{genreId}/tracks?limit=300`
-   - If a sub-genre (e.g., *Schlager*, *NDW*, *Indie*, *New Wave / Post-Punk*) is selected, it maps it to curated editorial playlist IDs in `PLAYLIST_MAP` (supporting single IDs or arrays of IDs) and queries the playlist tracklists:
+   - If a sub-genre (e.g., *Schlager*, *NDW*, *Indie*) or a decade (e.g., *50s*, *60s*, *70s*, *80s*, *90s*, *2000+*) is selected, it maps it to multiple curated editorial and official playlist IDs in `PLAYLIST_MAP`.
+   - **Parallel Fetching**: The tracklists for all mapped playlist IDs are fetched in parallel using `Promise.all` to optimize loading times:
      `https://api.deezer.com/playlist/{playlistId}/tracks?limit=300`
    - If no map matches, it falls back to a standard text search query:
      `https://api.deezer.com/search?q={term}&limit=300`
+   - **Top Charts Fallback**: If the total count of deduplicated unique songs is less than the requested `count`, the app automatically queries Deezer's global top charts (`/chart/0/tracks?limit=300`) to fill the remaining slots.
 
 2. **JSONP Fetcher (`fetchDeezerJsonp`)**:
    Deezer allows script-based callbacks by appending `output=jsonp&callback=...` to the URL. The app dynamically appends a `<script>` tag to the document, registers a unique window callback, and resolves the promise when the script executes, bypassing CORS.
