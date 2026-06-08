@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../state/GameContext';
 import { translations } from '../i18n/translations';
-import { CheckCircle, XCircle, ChevronRight, Heart, Play, Square } from 'lucide-react';
+import { CheckCircle, XCircle, ChevronRight, Heart, Play, Square, Info } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { addFavorite, removeFavorite, isFavorite } from '../utils/favorites';
 import { getThemeConfettiColors } from '../utils/confettiColors';
 import { audioManager } from '../services/audio';
+import { TrackInfoModal } from './TrackInfoModal';
 
 export const TurnResultScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -17,6 +18,7 @@ export const TurnResultScreen: React.FC = () => {
   const [isTransitioning, setIsTransitioning] = React.useState(false);
   const [isFav, setIsFav] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
   // Sync state with HTML5 audio events (play, pause, ended)
   useEffect(() => {
@@ -127,34 +129,57 @@ export const TurnResultScreen: React.FC = () => {
               </div>
             </div>
           )}
-          <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1, paddingRight: '2.5rem' }}>
+          <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1, paddingRight: '4.2rem' }}>
             <span style={{ fontWeight: 800, fontSize: '1.1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {state.currentSong.title}
             </span>
             <span className="text-muted" style={{ fontWeight: 600, fontSize: '0.9rem' }}>{state.currentSong.artist}</span>
             <span className="text-muted" style={{ fontSize: '0.8rem' }}>{state.currentSong.year}</span>
           </div>
-          <button 
-            className="fav-toggle-btn"
-            onClick={handleToggleFavorite}
-            style={{
-              position: 'absolute',
-              right: '0.75rem',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '0.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: isFav ? 'var(--danger)' : 'var(--text-muted)',
-              transition: 'color 0.2s ease, transform 0.2s ease',
-            }}
-          >
-            <Heart size={22} fill={isFav ? 'currentColor' : 'none'} />
-          </button>
+          <div style={{
+            position: 'absolute',
+            right: '0.5rem',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.15rem'
+          }}>
+            <button 
+              type="button"
+              className="info-btn-trigger"
+              onClick={() => setShowInfo(true)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '0.4rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--text-muted)'
+              }}
+            >
+              <Info size={20} />
+            </button>
+            <button 
+              className="fav-toggle-btn"
+              onClick={handleToggleFavorite}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '0.4rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: isFav ? 'var(--danger)' : 'var(--text-muted)',
+                transition: 'color 0.2s ease, transform 0.2s ease',
+              }}
+            >
+              <Heart size={20} fill={isFav ? 'currentColor' : 'none'} />
+            </button>
+          </div>
         </div>
       )}
       
@@ -194,6 +219,14 @@ export const TurnResultScreen: React.FC = () => {
           <ChevronRight size={24} className="group-hover-translate" />
         </button>
       </div>
+
+      {showInfo && state.currentSong && (
+        <TrackInfoModal 
+          song={state.currentSong}
+          lang={state.lang}
+          onClose={() => setShowInfo(false)}
+        />
+      )}
     </div>
   );
 };

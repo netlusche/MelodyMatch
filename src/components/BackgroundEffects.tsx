@@ -20,16 +20,11 @@ export const BackgroundEffects: React.FC = () => {
     // Check prefers-reduced-motion
     const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Resize handler
-    const resizeCanvas = () => {
-      cv.width = window.innerWidth;
-      cv.height = window.innerHeight;
-    };
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    // Initial sizing
+    cv.width = window.innerWidth;
+    cv.height = window.innerHeight;
 
     if (isReducedMotion) {
-      window.removeEventListener('resize', resizeCanvas);
       return;
     }
 
@@ -329,15 +324,24 @@ export const BackgroundEffects: React.FC = () => {
     let spotlightAngle1 = 0;
     let spotlightAngle2 = 0;
 
-    // Initialize state (Plain Dark has no initialized particles)
-    if (theme === 'default') initOrbs();
-    else if (theme === 'matrix') initMatrixLines();
-    else if (theme === 'westeros') initEmbers();
-    else if (theme === 'sakura') initPetals();
-    else if (theme === 'lcars') initLcars();
-    else if (theme === 'frutiger_aero') initBubbles();
-    else if (theme === 'heavy_metal') initSmoke();
-    else if (theme === 'rock_legends') initDustMotes();
+    // Resize handler that dynamically recalculates boundaries and regenerates particles
+    const resizeCanvas = () => {
+      cv.width = window.innerWidth;
+      cv.height = window.innerHeight;
+
+      if (theme === 'default') initOrbs();
+      else if (theme === 'matrix') initMatrixLines();
+      else if (theme === 'westeros') initEmbers();
+      else if (theme === 'sakura') initPetals();
+      else if (theme === 'lcars') initLcars();
+      else if (theme === 'frutiger_aero') initBubbles();
+      else if (theme === 'heavy_metal') initSmoke();
+      else if (theme === 'rock_legends') initDustMotes();
+    };
+
+    // Initialize state on mount & register resize handler
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
     // Loop
     const draw = () => {

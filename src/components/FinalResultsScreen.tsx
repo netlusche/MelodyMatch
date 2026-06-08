@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useGame } from '../state/GameContext';
 import { translations } from '../i18n/translations';
-import { Trophy, RotateCcw, Medal, Heart, Play, Square } from 'lucide-react';
+import { Trophy, RotateCcw, Medal, Heart, Play, Square, Info } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { addFavorite, removeFavorite, getFavorites } from '../utils/favorites';
 import { getThemeConfettiColors } from '../utils/confettiColors';
+import { TrackInfoModal } from './TrackInfoModal';
 
 export const FinalResultsScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -16,6 +17,7 @@ export const FinalResultsScreen: React.FC = () => {
 
   const [favIds, setFavIds] = useState<number[]>([]);
   const [playingId, setPlayingId] = useState<number | null>(null);
+  const [selectedSongForInfo, setSelectedSongForInfo] = useState<any | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleTogglePlay = (song: any) => {
@@ -198,7 +200,7 @@ export const FinalResultsScreen: React.FC = () => {
                       </button>
                     )
                   )}
-                  <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1, paddingRight: '2.2rem' }}>
+                  <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1, paddingRight: '3.8rem' }}>
                     <span style={{ fontWeight: 600, fontSize: '0.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text)' }}>
                       {song.title}
                     </span>
@@ -216,26 +218,50 @@ export const FinalResultsScreen: React.FC = () => {
                       </span>
                     )}
                   </div>
-                  <button 
-                    onClick={() => handleToggleFav(song)}
-                    style={{
-                      position: 'absolute',
-                      right: '0.5rem',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: '0.4rem',
-                      color: isFav ? 'var(--danger)' : 'var(--text-muted)',
-                      transition: 'color 0.2s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  >
-                    <Heart size={18} fill={isFav ? 'currentColor' : 'none'} />
-                  </button>
+                  <div style={{
+                    position: 'absolute',
+                    right: '0.4rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.1rem'
+                  }}>
+                    <button 
+                      type="button"
+                      className="info-btn-trigger"
+                      onClick={() => setSelectedSongForInfo(song)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '0.35rem',
+                        color: 'var(--text-muted)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <Info size={18} />
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => handleToggleFav(song)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '0.35rem',
+                        color: isFav ? 'var(--danger)' : 'var(--text-muted)',
+                        transition: 'color 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <Heart size={18} fill={isFav ? 'currentColor' : 'none'} />
+                    </button>
+                  </div>
                 </div>
               );
             })}
@@ -249,6 +275,14 @@ export const FinalResultsScreen: React.FC = () => {
           <span>{t.playAgain}</span>
         </button>
       </div>
+
+      {selectedSongForInfo && (
+        <TrackInfoModal 
+          song={selectedSongForInfo}
+          lang={state.lang}
+          onClose={() => setSelectedSongForInfo(null)}
+        />
+      )}
     </div>
   );
 };

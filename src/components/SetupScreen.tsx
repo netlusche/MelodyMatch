@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useGame } from '../state/GameContext';
 import { Player, Language, Theme, Song } from '../types';
-import { Users, Settings, Globe, ChevronRight, UserPlus, Trash2, Heart, Play, Square, ChevronDown, ChevronUp } from 'lucide-react';
+import { Users, Settings, Globe, ChevronRight, UserPlus, Trash2, Heart, Play, Square, ChevronDown, ChevronUp, Download, Info } from 'lucide-react';
 import { translations } from '../i18n/translations';
 import { getFavorites, removeFavorite } from '../utils/favorites';
 import packageInfo from '../../package.json';
+import { TrackInfoModal } from './TrackInfoModal';
+import { PlaylistExportModal } from './PlaylistExportModal';
 
 export const SetupScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -19,6 +21,8 @@ export const SetupScreen: React.FC = () => {
   const [showFavorites, setShowFavorites] = useState(false);
   const [favoritesList, setFavoritesList] = useState<Song[]>([]);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showExport, setShowExport] = useState(false);
+  const [selectedSongForInfo, setSelectedSongForInfo] = useState<Song | null>(null);
   const [playingId, setPlayingId] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
@@ -358,14 +362,25 @@ export const SetupScreen: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  <button 
-                    type="button"
-                    className="option-button danger outline sm"
-                    style={{ alignSelf: 'flex-end', fontSize: '0.8rem', padding: '0.25rem 0.75rem', minHeight: '32px' }}
-                    onClick={() => setShowClearConfirm(true)}
-                  >
-                    {t.clearFavorites}
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignSelf: 'flex-end' }}>
+                    <button 
+                      type="button"
+                      className="option-button primary outline sm"
+                      style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem', minHeight: '32px', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                      onClick={() => setShowExport(true)}
+                    >
+                      <Download size={14} />
+                      <span>{t.exportTitle}</span>
+                    </button>
+                    <button 
+                      type="button"
+                      className="option-button danger outline sm"
+                      style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem', minHeight: '32px' }}
+                      onClick={() => setShowClearConfirm(true)}
+                    >
+                      {t.clearFavorites}
+                    </button>
+                  </div>
                 )}
                 <div className="favorites-list-container">
                   {favoritesList.map(song => (
@@ -395,6 +410,14 @@ export const SetupScreen: React.FC = () => {
                         <div className="fav-item-details">{song.artist} ({song.year})</div>
                       </div>
                       <div className="fav-item-actions">
+                        <button 
+                          type="button"
+                          className="fav-action-btn info" 
+                          onClick={() => setSelectedSongForInfo(song)}
+                          title="Info"
+                        >
+                          <Info size={14} />
+                        </button>
                         <a 
                           href={`https://www.deezer.com/search/${encodeURIComponent(song.artist + ' ' + song.title)}`}
                           target="_blank" 
@@ -458,6 +481,22 @@ export const SetupScreen: React.FC = () => {
         </div>
         <div>Non-commercial hobby project • v{packageInfo.version}</div>
       </div>
+
+      {selectedSongForInfo && (
+        <TrackInfoModal 
+          song={selectedSongForInfo}
+          lang={lang}
+          onClose={() => setSelectedSongForInfo(null)}
+        />
+      )}
+
+      {showExport && favoritesList.length > 0 && (
+        <PlaylistExportModal 
+          songs={favoritesList}
+          lang={lang}
+          onClose={() => setShowExport(false)}
+        />
+      )}
     </div>
   );
 };

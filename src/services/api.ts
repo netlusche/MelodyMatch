@@ -305,10 +305,31 @@ export const fetchSongs = async (count: number, genres: string[] = ['all']): Pro
     
     // Filter out invalid items and deduplicate tracks using normalized string keys
     const uniqueKeys = new Set();
+    const blacklist = [
+      'die drei ???',
+      'die drei !!!',
+      'bibi blocksberg',
+      'tkkg',
+      'benjamin blümchen',
+      'hörspiel',
+      'folge',
+      'kapitel',
+      'teufelsberg',
+      'weihnachtsspiel'
+    ];
+
     const filterAndDeduplicate = (tracks: any[]) => {
       return tracks.filter((t: any) => {
         if (!t.preview || !t.title || !t.artist || !t.artist.name || !t.album || !t.album.cover_big) return false;
         
+        // Filter out audio plays (Hörspiele)
+        const titleLower = t.title.toLowerCase();
+        const artistLower = t.artist.name.toLowerCase();
+        const isAudioPlay = blacklist.some(term => 
+          titleLower.includes(term) || artistLower.includes(term)
+        );
+        if (isAudioPlay) return false;
+
         const matchKey = `${normalizeString(t.title)}-${normalizeString(t.artist.name)}`;
         if (uniqueKeys.has(matchKey)) return false;
         

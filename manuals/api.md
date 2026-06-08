@@ -35,6 +35,11 @@ When the user configures the game and clicks "Start Game", the required song poo
 4. **Deduplication & Shuffle**:
    Tracks are normalized to an alphanumeric title-artist key to discard duplicates (e.g. from overlapping genre charts). The remaining tracks are shuffled using an unbiased **Fisher-Yates shuffle** algorithm (`shuffleArray`) to ensure a completely uniform distribution, preventing any single selected genre from dominating the final sliced song pool (e.g., 100 songs).
 
+5. **Audio Play (Hörspiel) Filtering**:
+   German audio dramas (*Die drei ???*, *Bibi Blocksberg*, *TKKG*, *Benjamin Blümchen*, etc.) frequently flood German Deezer charts. To ensure the trivia pool only contains musical tracks, `filterAndDeduplicate` checks track titles and artist names against a case-insensitive blacklist:
+   `die drei ???`, `die drei !!!`, `bibi blocksberg`, `tkkg`, `benjamin blümchen`, `hörspiel`, `folge`, `kapitel`, `teufelsberg`, `weihnachtsspiel`.
+   Any matching tracks are discarded immediately.
+
 ---
 
 ## 2. On-the-Fly Year Lookup
@@ -61,3 +66,22 @@ During the transition from the `PASS_DEVICE` screen to the `QUIZ` screen, the ap
 
 3. **Absolute Fallback: Deezer API**:
    If all MusicBrainz and iTunes methods fail, the app queries `https://api.deezer.com/track/{trackId}` and parses `release_date` as a fallback. If this also fails, the current calendar year is returned as a safe default.
+
+---
+
+## 3. Song Background & Genius Lookup
+
+To provide background information about tracks without introducing heavy API key setups or CORS issues, MelodyMatch uses two client-side integrations:
+
+1. **Wikipedia Summary API**:
+   - **Step 1: Search Wikipedia**: The app first queries the Wikipedia search endpoint:
+     `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch="{title}" "{artist}"&format=json&origin=*`
+   - **Step 2: Fetch Article Summary**: If a search result is found, it fetches the clean text summary:
+     `https://en.wikipedia.org/api/rest_v1/page/summary/{pageTitle}`
+   - **Fallback Strategy**: If no song-specific page exists, the search repeats using the artist query (`"{artist}" band OR singer OR musician OR group`) to pull up the artist's biography.
+   - **Localizations**: Standard badges `wikiFallbackSong` ("Song Info" / "Song-Info") and `wikiFallbackArtist` ("Artist Bio" / "Interpret-Info") are translated inline.
+
+2. **Genius lyrics external linking**:
+   - Rather than fetching full lyrics via unreliable or slow scraping APIs, the app constructs a Genius.com URL client-side:
+     `https://genius.com/{artist}-{title}-lyrics`
+   - Slashes, spaces, and punctuation marks are stripped and replaced with hyphens to form the canonical slug, allowing users to read full lyrics and crowd-sourced song meanings on Genius.
