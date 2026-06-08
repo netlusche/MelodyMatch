@@ -989,9 +989,125 @@ body {
   filter: drop-shadow(0 0 10px var(--glow-primary));
 }
 
-/* Play Overlay on History Card Hover */
-.history-song-card:hover .play-overlay {
+/* Play Overlay and Zoom Hover System */
+.cover-play-wrapper {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cover-play-wrapper:hover {
+  transform: scale(1.04);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.cover-play-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+  display: block;
+}
+
+.cover-play-wrapper:hover .cover-play-img {
+  transform: scale(1.12);
+}
+
+.cover-play-wrapper .play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  color: #fff;
+  z-index: 2;
+}
+
+.cover-play-wrapper:hover .play-overlay,
+.cover-play-wrapper.playing .play-overlay {
   opacity: 1 !important;
+}
+
+.cover-play-wrapper .play-overlay svg {
+  box-sizing: content-box;
+  background: var(--primary);
+  color: #fff !important;
+  border-radius: 50%;
+  padding: 6px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), 0 0 8px var(--primary);
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s ease, box-shadow 0.25s ease;
+}
+
+.cover-play-wrapper:hover .play-overlay svg {
+  transform: scale(1.18);
+  background: var(--primary-hover);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), 0 0 12px var(--primary);
+}
+
+.cover-play-wrapper.playing .play-overlay svg {
+  animation: cover-play-pulse 1.5s infinite alternate;
+}
+
+@keyframes cover-play-pulse {
+  0% {
+    box-shadow: 0 0 4px var(--primary), 0 0 8px var(--primary);
+  }
+  100% {
+    box-shadow: 0 0 10px var(--primary), 0 0 16px var(--primary);
+    transform: scale(1.05);
+  }
+}
+
+/* Mobile corner play indicator badge */
+.play-badge-mobile {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  background: var(--primary);
+  color: #fff !important;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4), 0 0 3px var(--primary);
+  z-index: 3;
+  pointer-events: none;
+  transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.2s ease;
+  animation: badge-hint-pulse 1.2s infinite alternate ease-in-out; /* infinite gentle breathing pulse */
+}
+
+/* Hide on desktop hover when full overlay scales in */
+.cover-play-wrapper:hover .play-badge-mobile {
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+/* Pulse animation on mount */
+@keyframes badge-hint-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 2px var(--primary);
+  }
+  100% {
+    transform: scale(1.3);
+    background: var(--primary-hover);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), 0 0 10px var(--primary);
+  }
+}
+
+/* Hide mobile badge when playing (only show the large play-overlay) */
+.cover-play-wrapper.playing .play-badge-mobile {
+  display: none !important;
 }
 
 /* Custom Theme Dropdown Styling */

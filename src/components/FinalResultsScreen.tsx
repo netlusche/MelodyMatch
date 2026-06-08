@@ -126,54 +126,56 @@ export const FinalResultsScreen: React.FC = () => {
             <Heart size={16} fill="currentColor" className="text-danger" />
             <span>{t.playedSongs}</span>
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '205px', overflowY: 'auto', paddingRight: '4px' }}>
-            {state.history.map((song) => {
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '260px', overflowY: 'auto', paddingRight: '4px' }}>
+            {state.history.map((playedSong) => {
+              // Support legacy history items that might be direct Song objects
+              const song = (playedSong as any).song ? (playedSong as any).song : playedSong;
+              const player = (playedSong as any).player || '';
+              const results = (playedSong as any).results;
               const isFav = favIds.includes(song.id);
+              
+              const formatPointsBreakdown = (res: any) => {
+                if (!res) return t.noneLabel;
+                const parts: string[] = [];
+                if (res.title > 0) parts.push(`${t.titleLabel} (+${res.title})`);
+                if (res.artist > 0) parts.push(`${t.artistLabel} (+${res.artist})`);
+                if (res.year > 0) parts.push(`${t.yearLabel} (+${res.year})`);
+                return parts.length > 0 ? parts.join(', ') : t.noneLabel;
+              };
+
               return (
                 <div key={song.id} className="history-song-card" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', borderRadius: '12px', background: 'var(--card)', border: '1px solid var(--border)', position: 'relative' }}>
                   {song.artworkUrl ? (
                     <div 
+                      className={`cover-play-wrapper ${playingId === song.id ? 'playing' : ''}`}
                       onClick={() => handleTogglePlay(song)} 
+                      title={song.previewUrl ? (playingId === song.id ? t.pausePreview : t.playPreview) : undefined}
                       style={{ 
-                        position: 'relative', 
-                        width: 44, 
-                        height: 44, 
-                        borderRadius: '6px', 
-                        overflow: 'hidden', 
-                        cursor: song.previewUrl ? 'pointer' : 'default',
-                        flexShrink: 0
+                        width: 72, 
+                        height: 72, 
+                        borderRadius: '6px'
                       }}
                     >
-                      <img src={song.artworkUrl} alt={song.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={song.artworkUrl} alt={song.title} className="cover-play-img" />
                       {song.previewUrl && (
-                        <div 
-                          style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            background: playingId === song.id ? 'rgba(0, 0, 0, 0.6)' : 'rgba(0, 0, 0, 0.3)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            opacity: playingId === song.id ? 1 : 0,
-                            transition: 'opacity 0.2s ease',
-                            color: '#fff',
-                          }}
-                          className="play-overlay"
-                        >
-                          {playingId === song.id ? <Square size={16} fill="#fff" /> : <Play size={16} fill="#fff" />}
-                        </div>
+                        <>
+                          <div className="play-overlay">
+                            {playingId === song.id ? <Square size={20} fill="#fff" /> : <Play size={20} fill="#fff" />}
+                          </div>
+                          <div className="play-badge-mobile">
+                            {playingId === song.id ? <Square size={8} fill="#fff" /> : <Play size={8} fill="#fff" />}
+                          </div>
+                        </>
                       )}
                     </div>
                   ) : (
                     song.previewUrl && (
                       <button 
                         onClick={() => handleTogglePlay(song)}
+                        title={playingId === song.id ? t.pausePreview : t.playPreview}
                         style={{
-                          width: 44,
-                          height: 44,
+                          width: 72,
+                          height: 72,
                           borderRadius: '6px',
                           background: 'var(--badge-bg)',
                           border: '1px solid var(--border)',
@@ -185,21 +187,35 @@ export const FinalResultsScreen: React.FC = () => {
                           flexShrink: 0
                         }}
                       >
-                        {playingId === song.id ? <Square size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
+                        {playingId === song.id ? <Square size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
                       </button>
                     )
                   )}
-                  <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1, paddingRight: '2rem' }}>
-                    <span style={{ fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1, paddingRight: '2.2rem' }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text)' }}>
                       {song.title}
                     </span>
-                    <span className="text-muted" style={{ fontSize: '0.75rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{song.artist} ({song.year})</span>
+                    <span className="text-muted" style={{ fontSize: '0.75rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '0.1rem' }}>
+                      {song.artist} ({song.year})
+                    </span>
+                    {player && (
+                      <span className="text-muted" style={{ fontSize: '0.7rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '0.1rem' }}>
+                        {t.playedBy}: <span style={{ color: 'var(--text)', fontWeight: 500 }}>{player}</span>
+                      </span>
+                    )}
+                    {results && (
+                      <span className="text-muted" style={{ fontSize: '0.7rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '0.1rem' }}>
+                        {t.pointsFor}: <span style={{ color: 'var(--text)', fontWeight: 500 }}>{formatPointsBreakdown(results)}</span>
+                      </span>
+                    )}
                   </div>
                   <button 
                     onClick={() => handleToggleFav(song)}
                     style={{
                       position: 'absolute',
                       right: '0.5rem',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
                       background: 'transparent',
                       border: 'none',
                       cursor: 'pointer',

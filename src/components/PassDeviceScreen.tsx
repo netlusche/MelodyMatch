@@ -17,11 +17,11 @@ export const PassDeviceScreen: React.FC = () => {
     setIsBeginning(true);
 
     const playedKeys = new Set(
-      state.history.map((s: any) => `${normalizeString(s.title)}-${normalizeString(s.artist)}`)
+      state.history.map((h) => `${normalizeString(h.song.title)}-${normalizeString(h.song.artist)}`)
     );
     
-    const availablePool = state.songPool.filter((s: any) => {
-      const isPlayedId = state.history.some((h: any) => h.id === s.id);
+    const availablePool = state.songPool.filter((s) => {
+      const isPlayedId = state.history.some((h) => h.song.id === s.id);
       const songKey = `${normalizeString(s.title)}-${normalizeString(s.artist)}`;
       return !isPlayedId && !playedKeys.has(songKey);
     });

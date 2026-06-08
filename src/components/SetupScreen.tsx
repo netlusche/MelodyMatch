@@ -4,6 +4,7 @@ import { Player, Language, Theme, Song } from '../types';
 import { Users, Settings, Globe, ChevronRight, UserPlus, Trash2, Heart, Play, Square, ChevronDown, ChevronUp } from 'lucide-react';
 import { translations } from '../i18n/translations';
 import { getFavorites, removeFavorite } from '../utils/favorites';
+import packageInfo from '../../package.json';
 
 export const SetupScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -319,18 +320,31 @@ export const SetupScreen: React.FC = () => {
                 <div className="favorites-list-container">
                   {favoritesList.map(song => (
                     <div key={song.id} className="fav-item-row">
+                      {song.artworkUrl && (
+                        <div 
+                          className={`cover-play-wrapper ${playingId === song.id ? 'playing' : ''}`}
+                          onClick={() => handleTogglePlay(song)}
+                          title={playingId === song.id ? t.pausePreview : t.playPreview}
+                          style={{ 
+                            width: '36px', 
+                            height: '36px', 
+                            borderRadius: '6px'
+                          }} 
+                        >
+                          <img src={song.artworkUrl} alt={song.title} className="cover-play-img" />
+                          <div className="play-overlay">
+                            {playingId === song.id ? <Square size={12} fill="#fff" /> : <Play size={12} fill="#fff" />}
+                          </div>
+                          <div className="play-badge-mobile">
+                            {playingId === song.id ? <Square size={8} fill="#fff" /> : <Play size={8} fill="#fff" />}
+                          </div>
+                        </div>
+                      )}
                       <div className="fav-item-info">
                         <div className="fav-item-title">{song.title}</div>
                         <div className="fav-item-details">{song.artist} ({song.year})</div>
                       </div>
                       <div className="fav-item-actions">
-                        <button 
-                          className="fav-action-btn play" 
-                          onClick={() => handleTogglePlay(song)}
-                          title="Preview"
-                        >
-                          {playingId === song.id ? <Square size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
-                        </button>
                         <a 
                           href={`https://www.deezer.com/search/${encodeURIComponent(song.artist + ' ' + song.title)}`}
                           target="_blank" 
@@ -392,7 +406,7 @@ export const SetupScreen: React.FC = () => {
           </svg>
           <span>MusicBrainz API</span>
         </div>
-        <div>Non-commercial hobby project</div>
+        <div>Non-commercial hobby project • v{packageInfo.version}</div>
       </div>
     </div>
   );

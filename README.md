@@ -14,7 +14,10 @@ A fast-paced, interactive, modern local-multiplayer music quiz built with React,
 - **Safari Autoplay Unlock**: Synchronously anchors the audio play promise to the user gesture (e.g., clicking "Begin Turn"), ensuring audio previews play instantly on iOS Safari.
 - **Expanded Theme System & Canvas Animation Effects**: Easily switch between seven visual themes: **Default (Neon Party)**, **Plain White (accessible light mode)**, **Plain Dark**, **Cyberpunk**, **Vaporwave**, **Westeros**, and **Sakura**. A high-performance fixed `<canvas>` background renders customized theme-specific animation loops (drifting neon particles, twinkling star fields, Matrix binary code streams, scrolling perspective grids, rising warm fire embers, or falling cherry blossom petals) that automatically respect system `prefers-reduced-motion` settings.
 - **Modern Theme Selector Dropdown**: Built a custom React-based dropdown selector replacing native pickers to ensure it always renders downwards (preventing clipping on mobile screens) and supports custom scrolling.
-- **Persistent Favorites Playlist ("Liked Songs")**: Save discovered songs to a local storage-backed playlist directly during turns or on the final results scoreboard. Features include in-app preview playing, Apple Music/Deezer search links, and clear-list utilities.
+- **Persistent Favorites Playlist ("Liked Songs")**: Save discovered songs to a local storage-backed playlist directly during turns or on the final results scoreboard. Features include:
+  - In-app preview playing by directly clicking the cover arts.
+  - A mobile-friendly themed corner play badge indicator that pulses 3 times on mount (e.g., when opening the Liked Songs accordion or loading the scoreboard) and pulses continuously while playing, fading out on desktop hover.
+  - Apple Music & Deezer search links, and list-clearing utilities.
 - **Genre Selection Constraints & Alerts**: Matching the visual design of the active theme, the start button goes visually inactive when no genres are selected. Pressing it triggers a beautiful glassmorphism-styled warning modal prompting the user to select at least one genre.
 - **Localization**: Full English (EN) and German (DE) localization, including region-specific genre configurations.
 

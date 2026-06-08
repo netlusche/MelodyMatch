@@ -98,7 +98,20 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
           ...state.turnResults,
           [field]: action.payload.points,
         },
-        history: state.currentSong ? [...state.history, state.currentSong] : state.history,
+        history: state.currentSong
+          ? [
+              ...state.history,
+              {
+                song: state.currentSong,
+                player: state.players[state.currentPlayerIndex]?.name || `Player ${state.currentPlayerIndex + 1}`,
+                points: finalTurnPoints,
+                results: {
+                  ...state.turnResults,
+                  [field]: action.payload.points,
+                },
+              },
+            ]
+          : state.history,
       };
     }
     case 'NEXT_TURN': {

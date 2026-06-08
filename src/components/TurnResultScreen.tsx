@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../state/GameContext';
 import { translations } from '../i18n/translations';
-import { CheckCircle, XCircle, ChevronRight, Heart } from 'lucide-react';
+import { CheckCircle, XCircle, ChevronRight, Heart, Play, Square } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { addFavorite, removeFavorite, isFavorite } from '../utils/favorites';
 import { getThemeConfettiColors } from '../utils/confettiColors';
+import { audioManager } from '../services/audio';
 
 export const TurnResultScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -15,8 +16,30 @@ export const TurnResultScreen: React.FC = () => {
 
   const [isTransitioning, setIsTransitioning] = React.useState(false);
   const [isFav, setIsFav] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(!audioManager.getAudio().paused);
 
-  React.useEffect(() => {
+  // Sync state with HTML5 audio events (play, pause, ended)
+  useEffect(() => {
+    const audio = audioManager.getAudio();
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => setIsPlaying(false);
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('ended', handleEnded);
+
+    // Initial sync
+    setIsPlaying(!audio.paused);
+
+    return () => {
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('ended', handleEnded);
+    };
+  }, []);
+
+  useEffect(() => {
     if (isCorrect) {
       confetti({
         particleCount: 100,
@@ -44,9 +67,21 @@ export const TurnResultScreen: React.FC = () => {
     }
   };
 
+  const handleTogglePlay = () => {
+    if (!state.currentSong) return;
+    if (isPlaying) {
+      audioManager.pause();
+    } else {
+      audioManager.playSong(state.currentSong.previewUrl).catch(err => {
+        console.warn("Playback failed:", err);
+      });
+    }
+  };
+
   const handleNext = () => {
     if (isTransitioning) return;
     setIsTransitioning(true);
+    audioManager.pause();
     dispatch({ type: 'NEXT_TURN' });
   };
 
@@ -67,7 +102,24 @@ export const TurnResultScreen: React.FC = () => {
       {state.currentSong && (
         <div className="song-info-card w-full max-w-sm fade-in drop-shadow" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', borderRadius: '12px', background: 'var(--card)', border: '1px solid var(--border)', position: 'relative' }}>
           {state.currentSong.artworkUrl && (
-            <img src={state.currentSong.artworkUrl} alt="Album Art" style={{ width: 60, height: 60, borderRadius: '8px', objectFit: 'cover' }} />
+            <div 
+              className={`cover-play-wrapper ${isPlaying ? 'playing' : ''}`}
+              onClick={handleTogglePlay}
+              title={isPlaying ? t.pausePreview : t.playPreview}
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: '8px'
+              }}
+            >
+              <img src={state.currentSong.artworkUrl} alt="Album Art" className="cover-play-img" />
+              <div className="play-overlay">
+                {isPlaying ? <Square size={20} fill="#fff" /> : <Play size={20} fill="#fff" />}
+              </div>
+              <div className="play-badge-mobile">
+                {isPlaying ? <Square size={8} fill="#fff" /> : <Play size={8} fill="#fff" />}
+              </div>
+            </div>
           )}
           <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1, paddingRight: '2.5rem' }}>
             <span style={{ fontWeight: 800, fontSize: '1.1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
