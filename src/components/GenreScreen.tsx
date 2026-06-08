@@ -69,8 +69,9 @@ export const GenreScreen: React.FC = () => {
       return;
     }
     setIsLoading(true);
-    // Fetch a massive static pool of 100 songs regardless of round count to guarantee huge variety in wrong-answer multiple-choice generation!
-    const fetchedSongs = await fetchSongs(100, selectedGenres);
+    // Size the song pool dynamically based on game configuration, with a safe buffer and a minimum of 100 songs
+    const neededSongsCount = Math.max(100, state.players.length * state.totalRounds + 10);
+    const fetchedSongs = await fetchSongs(neededSongsCount, selectedGenres);
     
     if (fetchedSongs.length > 0) {
       dispatch({ type: 'SET_SONG_POOL', payload: { songs: fetchedSongs } });

@@ -90,11 +90,37 @@ export const QuizScreen: React.FC = () => {
     setIsTransitioning(false);
   }, [step]);
 
+  // Sync state with HTML5 audio events (play, pause, ended)
+  React.useEffect(() => {
+    const audio = audioManager.getAudio();
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => setIsPlaying(false);
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('ended', handleEnded);
+
+    // Sync state immediately and after a small delay to handle autoplay activation timing
+    setIsPlaying(!audio.paused);
+    const syncTimer = setTimeout(() => {
+      setIsPlaying(!audio.paused);
+    }, 150);
+
+    return () => {
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('ended', handleEnded);
+      clearTimeout(syncTimer);
+    };
+  }, []);
+
   const toggleAudio = () => {
     if (isPlaying) {
       audioManager.pause();
       setIsPlaying(false);
     } else {
+      setIsPlaying(true);
       const audio = audioManager.getAudio();
       audio.play()
         .then(() => setIsPlaying(true))

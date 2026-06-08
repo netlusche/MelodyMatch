@@ -16,7 +16,7 @@ export const TurnResultScreen: React.FC = () => {
 
   const [isTransitioning, setIsTransitioning] = React.useState(false);
   const [isFav, setIsFav] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(!audioManager.getAudio().paused);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // Sync state with HTML5 audio events (play, pause, ended)
   useEffect(() => {
@@ -29,13 +29,16 @@ export const TurnResultScreen: React.FC = () => {
     audio.addEventListener('pause', handlePause);
     audio.addEventListener('ended', handleEnded);
 
-    // Initial sync
-    setIsPlaying(!audio.paused);
+    // Delayed initial sync to let Safari's audio state transition settle
+    const syncTimer = setTimeout(() => {
+      setIsPlaying(!audio.paused);
+    }, 150);
 
     return () => {
       audio.removeEventListener('play', handlePlay);
       audio.removeEventListener('pause', handlePause);
       audio.removeEventListener('ended', handleEnded);
+      clearTimeout(syncTimer);
     };
   }, []);
 
@@ -71,9 +74,12 @@ export const TurnResultScreen: React.FC = () => {
     if (!state.currentSong) return;
     if (isPlaying) {
       audioManager.pause();
+      setIsPlaying(false);
     } else {
+      setIsPlaying(true);
       audioManager.playSong(state.currentSong.previewUrl).catch(err => {
         console.warn("Playback failed:", err);
+        setIsPlaying(false);
       });
     }
   };

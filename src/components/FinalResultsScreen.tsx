@@ -30,7 +30,14 @@ export const FinalResultsScreen: React.FC = () => {
         audioRef.current.pause();
       }
       audioRef.current = new Audio(song.previewUrl);
-      audioRef.current.play().catch(e => console.warn("Preview playback failed", e));
+      audioRef.current.play()
+        .then(() => {
+          // Playback succeeded
+        })
+        .catch(e => {
+          console.warn("Preview playback failed", e);
+          setPlayingId(null);
+        });
       audioRef.current.onended = () => setPlayingId(null);
       setPlayingId(song.id);
     }

@@ -13,24 +13,24 @@ const GENRE_MAP: Record<string, number> = {
 };
 
 const PLAYLIST_MAP: Record<string, number | number[]> = {
-  'indie': 9372936102, // The Indie Café
-  'classic rock': 6046721604, // Rock Klassiker
-  'schlager': 8699026122, // Schlager Hits
-  'ndw': 6758361584, // Neue Deutsche Welle
-  'deutschpop': 11242422704, // Deutschpop Hits
-  'deutschrock': 1956739222, // Deutschrock
-  'deutscher rap': 10578289242, // Deutscher Rap Hits
-  'ballermann': 10328601542, // Ballermann Party Hits
-  'partyhits': 2097558104, // Party Hits
+  'indie': [9372936102, 754725481, 8716319082, 10452440062], // The Indie Café, crush <3, Indie Rock Essentials, Indie rock essentials
+  'classic rock': [6046721604, 14233924321, 1306931615, 1405240385], // Rock Klassiker, Classic Rock Greatest Hits 1, Rock Essentials, 70s Rock
+  'schlager': [8699026122, 2813303064, 1917690502, 11354266504, 12462638963], // Schlager Super Hits, Karneval Schlager Party, Schlagerparty, Schlager Sommer, Schlager Queens
+  'ndw': [6758361584, 1230675621, 11573856644, 10457025082], // Neue Deutsche Welle, NDW Hits, Sommer Hits - 80er, Hits - 80er
+  'deutschpop': [11242422704, 1495051201, 8668716682], // Deutschpop Super Hits, Frischer Deutschpop, Deutschpop Hits von heute
+  'deutschrock': [1956739222, 11242423484, 11909416601, 10396822102], // Deutschrock Essentials, Rock Super Hits, 2023 Rock Germany, Deutschland 00er
+  'deutscher rap': [10578289242, 14639295721, 1043463931, 146820791, 11533942424], // Deutschrap Super Hits, Deutsche-Hits, Freitag alles neu, Deutschrap Hits, Deutschrap Essentials
+  'ballermann': [10328601542, 14950680143, 9486947662], // Endlich wieder Malle, Malle/Schlager Hits, Après Ski Hits
+  'partyhits': [2097558104, 740966875, 11203091824, 8699026122, 1917690502, 10328601542], // Party Hits, Club Party Hits, Dance Hits, Schlager Super Hits, Schlagerparty, Endlich wieder Malle
   'new wave': [8515679522, 8700369282], // New Wave Essentials & Post-Punk Essentials
   
   // Decades
-  '50s': [735402575, 4020144442],
-  '60s': [620264073, 1437011185],
-  '70s': [1470022445, 8877326262],
-  '80s': [867825522, 1913763402],
-  '90s': [878989033, 3829647662],
-  '2000+': [248297032, 715215865],
+  '50s': [735402575, 4020144442, 11031329462, 3954210902, 9010212882, 5958115324], // 50s Rock 'n' Roll, Billboard 50s, Rock 'n' Roll classics, 50er/60er, 50's Blues, 50's Jazz
+  '60s': [620264073, 1437011185, 8962730322, 14597757781, 8181759022, 3566625202, 11031329462], // 60s Hits, 60s Rock, 60s Pop, 60s Ballads, Billboard 60s, 60er, Rock 'n' Roll classics
+  '70s': [1470022445, 8877326262, 5605928862, 57280214, 1319793647, 7130870324], // 70s Hits, 70s Happy Hits, 70er Jahre, 1970s, 70s Hits Top 100, 70s Greatest Hits
+  '80s': [867825522, 1913763402, 11384036324, 6208592984, 8512471762, 8873745702, 8403360702], // 80s Hits, 80s Party Hits, 80's Essentials, 1980s, 80s Pop, 80s Happy Hits, 80s Ballads
+  '90s': [878989033, 3829647662, 7852252022, 8873744282, 8403350722, 969361861], // 90s Hits, 90er Party Hits, Back to the 90 & 2000er, 90s Happy Hits, 90s Ballads, Année 1990 & 2000
+  '2000+': [248297032, 715215865, 14917741483, 9100953002, 14285831341, 12272270431, 11308515444], // 00s Hits, 10s Party Hits, 10s Hits, 10s Ballads, 2000s-2010s Party, 20s Hits, Pop & Rock Hits
 };
 
 const SEARCH_TERMS = ['pop music', 'rock music', 'party hits', '90s hits', '2000s hits', 'dance music', 'chart hits'];
@@ -271,17 +271,25 @@ export const fetchSongs = async (count: number, genres: string[] = ['all']): Pro
           // Curated playlist for sub-genres and specific categories (supports single ID or array)
           const val = PLAYLIST_MAP[term];
           const playlistIds = Array.isArray(val) ? val : [val];
-          for (const pid of playlistIds) {
+          // Fetch all playlists in parallel using Promise.all
+          const playlistPromises = playlistIds.map(async (pid) => {
             try {
               const url = `https://api.deezer.com/playlist/${pid}/tracks?limit=300`;
               const data = await fetchDeezerJsonp(url);
               if (data && data.data) {
-                resultsArray.push(data.data);
+                return data.data;
               }
             } catch (e) {
               console.error("Deezer playlist fetch failed for pid:", pid, e);
             }
-          }
+            return [];
+          });
+          const resolvedDataList = await Promise.all(playlistPromises);
+          resolvedDataList.forEach(data => {
+            if (data && data.length > 0) {
+              resultsArray.push(data);
+            }
+          });
         } else {
           // Fallback search
           const url = `https://api.deezer.com/search?q=${encodeURIComponent(term)}&limit=300`;
@@ -297,15 +305,34 @@ export const fetchSongs = async (count: number, genres: string[] = ['all']): Pro
     
     // Filter out invalid items and deduplicate tracks using normalized string keys
     const uniqueKeys = new Set();
-    const validTracks = allResults.filter((t: any) => {
-      if (!t.preview || !t.title || !t.artist || !t.artist.name || !t.album || !t.album.cover_big) return false;
-      
-      const matchKey = `${normalizeString(t.title)}-${normalizeString(t.artist.name)}`;
-      if (uniqueKeys.has(matchKey)) return false;
-      
-      uniqueKeys.add(matchKey);
-      return true;
-    });
+    const filterAndDeduplicate = (tracks: any[]) => {
+      return tracks.filter((t: any) => {
+        if (!t.preview || !t.title || !t.artist || !t.artist.name || !t.album || !t.album.cover_big) return false;
+        
+        const matchKey = `${normalizeString(t.title)}-${normalizeString(t.artist.name)}`;
+        if (uniqueKeys.has(matchKey)) return false;
+        
+        uniqueKeys.add(matchKey);
+        return true;
+      });
+    };
+
+    let validTracks = filterAndDeduplicate(allResults);
+
+    // Fallback: If we don't have enough tracks, fetch from Deezer global top charts
+    if (validTracks.length < count) {
+      console.warn(`Song pool size (${validTracks.length}) is less than requested count (${count}). Fetching fallback tracks from global charts...`);
+      try {
+        const globalUrl = `https://api.deezer.com/chart/0/tracks?limit=300`;
+        const globalData = await fetchDeezerJsonp(globalUrl);
+        if (globalData && globalData.data) {
+          const fallbackTracks = filterAndDeduplicate(globalData.data);
+          validTracks = [...validTracks, ...fallbackTracks];
+        }
+      } catch (e) {
+        console.error("Failed to fetch fallback tracks from global charts:", e);
+      }
+    }
     
     // Shuffle the tracks
     const shuffled = shuffleArray(validTracks);
