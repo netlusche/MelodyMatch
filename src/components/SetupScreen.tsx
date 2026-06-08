@@ -18,6 +18,7 @@ export const SetupScreen: React.FC = () => {
 
   const [showFavorites, setShowFavorites] = useState(false);
   const [favoritesList, setFavoritesList] = useState<Song[]>([]);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [playingId, setPlayingId] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
@@ -28,6 +29,7 @@ export const SetupScreen: React.FC = () => {
   // Load favorites when screen mounts or when toggled
   useEffect(() => {
     setFavoritesList(getFavorites());
+    setShowClearConfirm(false);
   }, [showFavorites]);
 
   useEffect(() => {
@@ -317,13 +319,54 @@ export const SetupScreen: React.FC = () => {
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
-                <button 
-                  className="option-button danger outline sm"
-                  style={{ alignSelf: 'flex-end', fontSize: '0.8rem', padding: '0.25rem 0.75rem', minHeight: '32px' }}
-                  onClick={handleClearFavorites}
-                >
-                  {t.clearFavorites}
-                </button>
+                {showClearConfirm ? (
+                  <div className="confirm-clear-box fade-in" style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    padding: '1rem',
+                    background: 'var(--body-bg)',
+                    border: '1px dashed var(--danger)',
+                    borderRadius: '12px',
+                    margin: '0.5rem 0',
+                    textAlign: 'center'
+                  }}>
+                    <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text)' }}>
+                      {t.confirmClear}
+                    </span>
+                    <div style={{ display: 'flex', gap: '0.5rem', width: '100%', justifyContent: 'center' }}>
+                      <button 
+                        type="button"
+                        className="option-button outline sm"
+                        style={{ minHeight: '32px', fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
+                        onClick={() => setShowClearConfirm(false)}
+                      >
+                        {t.cancel}
+                      </button>
+                      <button 
+                        type="button"
+                        className="option-button danger sm"
+                        style={{ minHeight: '32px', fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
+                        onClick={() => {
+                          handleClearFavorites();
+                          setShowClearConfirm(false);
+                        }}
+                      >
+                        {t.yesClear}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button 
+                    type="button"
+                    className="option-button danger outline sm"
+                    style={{ alignSelf: 'flex-end', fontSize: '0.8rem', padding: '0.25rem 0.75rem', minHeight: '32px' }}
+                    onClick={() => setShowClearConfirm(true)}
+                  >
+                    {t.clearFavorites}
+                  </button>
+                )}
                 <div className="favorites-list-container">
                   {favoritesList.map(song => (
                     <div key={song.id} className="fav-item-row">

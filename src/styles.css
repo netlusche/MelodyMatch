@@ -134,6 +134,12 @@ body {
   to { opacity: 1; transform: scale(1); }
 }
 
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+
 /* Typography Enhancements */
 .gigantic {
   font-size: 2.25rem;
