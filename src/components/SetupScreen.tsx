@@ -356,7 +356,7 @@ export const SetupScreen: React.FC = () => {
                   </div>
                 ) : (
                   <div style={{ display: 'flex', gap: '0.5rem', alignSelf: 'flex-end' }}>
-                    {favoritesList.length > 3 && (
+                    {favoritesList.length > 0 && (
                       <button
                         type="button"
                         className="option-button outline sm"

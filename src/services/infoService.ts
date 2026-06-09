@@ -232,6 +232,8 @@ const findAlbumPage = async (sub: string, albumName: string, cArtist: string): P
   return null;
 };
 
+const wikiCache = new Map<string, WikiResult>();
+
 /**
  * Fetch a summary from Wikipedia for either the song, the album, or the artist as a fallback.
  */
@@ -241,6 +243,9 @@ export const fetchWikipediaSummary = async (title: string, artist: string, lang:
   const cAlbum = albumName ? cleanTitle(albumName) : undefined;
 
   if (!cTitle || !cArtist) return null;
+
+  const cacheKey = `${cTitle}|${cArtist}|${lang}`;
+  if (wikiCache.has(cacheKey)) return wikiCache.get(cacheKey)!;
 
   const primarySub = lang === 'de' ? 'de' : 'en';
   const secondarySub = lang === 'de' ? 'en' : 'de';
@@ -405,80 +410,21 @@ export const fetchWikipediaSummary = async (title: string, artist: string, lang:
   // Run level-by-level search across primary and secondary subdomains:
   // 1. Try Song search
   let res = await trySong(primarySub);
-  if (res) return res;
+  if (res) { wikiCache.set(cacheKey, res); return res; }
   res = await trySong(secondarySub);
-  if (res) return res;
+  if (res) { wikiCache.set(cacheKey, res); return res; }
 
   // 2. Try Album search
   res = await tryAlbum(primarySub);
-  if (res) return res;
+  if (res) { wikiCache.set(cacheKey, res); return res; }
   res = await tryAlbum(secondarySub);
-  if (res) return res;
+  if (res) { wikiCache.set(cacheKey, res); return res; }
 
   // 3. Try Artist search
   res = await tryArtist(primarySub);
-  if (res) return res;
+  if (res) { wikiCache.set(cacheKey, res); return res; }
   res = await tryArtist(secondarySub);
-  if (res) return res;
-
-  return null;
-};
-
-/**
- * Fetch lyrics from the LRCLIB API.
- */
-export const fetchLyrics = async (title: string, artist: string): Promise<string | null> => {
-  const cTitle = cleanTitle(title);
-  const cArtist = cleanArtist(artist);
-
-  if (!cTitle || !cArtist) return null;
-
-  // Helper for fetch with timeout
-  const fetchWithTimeout = async (url: string, timeout = 2000) => {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
-    try {
-      const response = await fetch(url, { signal: controller.signal });
-      clearTimeout(id);
-      return response;
-    } catch (err) {
-      clearTimeout(id);
-      throw err;
-    }
-  };
-
-  // Strategy 1: Fast Search (queries only internal database, no external scraper overhead)
-  const searchUrl = `https://lrclib.net/api/search?q=${encodeURIComponent(cArtist + ' ' + cTitle)}`;
-  try {
-    const res = await fetchWithTimeout(searchUrl, 1500);
-    if (res.ok) {
-      const results = await res.json();
-      if (Array.isArray(results) && results.length > 0) {
-        // Find the first result containing lyrics and matching the artist name
-        const bestMatch = results.find(r => 
-          (r.plainLyrics || r.syncedLyrics) && 
-          r.artistName.toLowerCase().includes(cArtist.toLowerCase())
-        );
-        if (bestMatch) {
-          return bestMatch.plainLyrics || bestMatch.syncedLyrics || null;
-        }
-      }
-    }
-  } catch (error) {
-    console.warn("Fast lyrics search failed or timed out:", error);
-  }
-
-  // Strategy 2: Direct Get with short timeout fallback
-  const getUrl = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(cArtist)}&track_name=${encodeURIComponent(cTitle)}`;
-  try {
-    const res = await fetchWithTimeout(getUrl, 2000);
-    if (res.ok) {
-      const data = await res.json();
-      return data.plainLyrics || data.syncedLyrics || null;
-    }
-  } catch (error) {
-    console.warn("Fallback direct lyrics fetch failed or timed out:", error);
-  }
+  if (res) { wikiCache.set(cacheKey, res); return res; }
 
   return null;
 };
@@ -518,6 +464,9 @@ export const getGeniusUrl = (artist: string, title: string): string => {
     }
     if (lower === 'döf' || lower === 'doef') {
       return 'DÖF (AUT)';
+    }
+    if (lower === 'r.e.m.' || lower === 'rem') {
+      return 'R-E-M';
     }
     return cleaned;
   };
