@@ -1220,12 +1220,40 @@ body {
 }
 
 .modal-artwork {
-  width: 56px;
-  height: 56px;
-  border-radius: 8px;
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
   object-fit: cover;
   border: 1px solid var(--border);
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* Zoom Button Overlay on List Cover Art */
+.cover-play-wrapper .zoom-overlay-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.cover-play-wrapper .zoom-overlay-badge:hover {
+  opacity: 1;
+  background: var(--primary);
+  border-color: transparent;
+  transform: scale(1.15);
 }
 
 .modal-header-text {
@@ -1393,4 +1421,230 @@ body {
 .info-btn-trigger:hover {
   opacity: 1;
   transform: scale(1.1);
+}
+
+/* Artwork Zoom Styles */
+.artwork-zoom-trigger {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 12px;
+  display: inline-block;
+  line-height: 0;
+}
+
+.artwork-zoom-trigger img {
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.artwork-zoom-trigger:hover img {
+  transform: scale(1.05);
+}
+
+.artwork-zoom-badge {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.artwork-zoom-trigger:hover .artwork-zoom-badge {
+  opacity: 1;
+  transform: scale(1.1);
+  background: var(--primary);
+  border-color: transparent;
+}
+
+/* Fullscreen Zoom Overlay */
+.zoom-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(15px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2100;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.zoom-overlay-card {
+  position: relative;
+  max-width: min(90vw, 500px);
+  max-height: min(90vh, 500px);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 2px solid var(--border-hover);
+  animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.zoom-artwork {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.zoom-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(4px);
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  border-radius: 50% !important;
+  padding: 0.4rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.zoom-close-btn:hover {
+  background: var(--danger) !important;
+  border-color: transparent !important;
+  transform: scale(1.05);
+}
+
+/* Selected Genres Link (fixed on the bottom left, symmetrical to start-over-btn) */
+.selected-genres-link {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  z-index: 100;
+  transition: all 0.2s ease;
+}
+
+.selected-genres-link:hover {
+  background: var(--card-hover);
+  border-color: var(--border-hover);
+  color: var(--text);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
+}
+
+/* Selected Genres Dialog */
+.selected-genres-dialog {
+  background: var(--card);
+  border: 2px solid var(--border-hover);
+  border-radius: 20px;
+  padding: 1.5rem;
+  max-width: 350px;
+  width: 100%;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  backdrop-filter: blur(12px);
+  animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.selected-genres-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.75rem;
+}
+
+.selected-genres-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.selected-genres-body {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.genres-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.genre-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border);
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: var(--text);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.genre-chip:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--border-hover);
+  transform: translateY(-1px);
+}
+
+@media (min-width: 768px) {
+  .start-over-btn {
+    right: max(1.5rem, calc(50% - 380px));
+    bottom: 1.5rem;
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 14px;
+  }
+  
+  .start-over-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+  
+  .selected-genres-link {
+    left: max(1.5rem, calc(50% - 380px));
+    bottom: 1.5rem;
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 14px;
+  }
+  
+  .selected-genres-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+}
+
+.wiki-sublink {
+  color: var(--text-muted);
+  opacity: 0.8;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.wiki-sublink:hover {
+  color: var(--primary);
+  opacity: 1;
+  text-decoration: underline;
 }

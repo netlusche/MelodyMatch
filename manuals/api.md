@@ -70,18 +70,23 @@ During the transition from the `PASS_DEVICE` screen to the `QUIZ` screen, the ap
 ---
 
 ## 3. Song Background & Genius Lookup
-
+ 
 To provide background information about tracks without introducing heavy API key setups or CORS issues, MelodyMatch uses two client-side integrations:
-
+ 
 1. **Wikipedia Summary API**:
-   - **Step 1: Search Wikipedia**: The app first queries the Wikipedia search endpoint:
-     `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch="{title}" "{artist}"&format=json&origin=*`
-   - **Step 2: Fetch Article Summary**: If a search result is found, it fetches the clean text summary:
-     `https://en.wikipedia.org/api/rest_v1/page/summary/{pageTitle}`
-   - **Fallback Strategy**: If no song-specific page exists, the search repeats using the artist query (`"{artist}" band OR singer OR musician OR group`) to pull up the artist's biography.
-   - **Localizations**: Standard badges `wikiFallbackSong` ("Song Info" / "Song-Info") and `wikiFallbackArtist` ("Artist Bio" / "Interpret-Info") are translated inline.
-
+   - **Multi-Level Cascading Search**: To maximize the chance of finding relevant background info, the search cascaded across three hierarchical levels:
+     1. **Song-Level**: Queries `"{title}" "{artist}"`.
+     2. **Album-Level** (if song fails and album name is known): Queries `intitle:"{albumName}" "{artist}"` or fallback search `"{albumName}" "{artist}" album`.
+     3. **Artist-Level** (if song and album fail): Queries `intitle:"{artist}"` or fallback search `"{artist}" band OR singer OR musician OR group`.
+   - **Language Cascading**: For each search level, the app first queries the active game language subdomain (e.g. `de.wikipedia.org` if German is selected). If no summary is found, it immediately falls back to search the other language subdomain (e.g. `en.wikipedia.org`). This ensures German-specific bands (like NDW artists) return summaries even when the game is played in English.
+   - **Disambiguation & Validation**: To prevent matching wrong pages (such as the band *Ideal* redirecting to the philosophy article *Ideal (Philosophie)*), the app checks for disambiguation types and validates page content descriptions.
+   - **Badges**: Standardized translated badges identify what type of information is shown: `wikiFallbackSong` ("Song Info"), `wikiFallbackAlbum` ("Album Info"), and `wikiFallbackArtist` ("Artist Bio").
+ 
 2. **Genius lyrics external linking**:
-   - Rather than fetching full lyrics via unreliable or slow scraping APIs, the app constructs a Genius.com URL client-side:
+   - Rather than fetching full lyrics via scraping APIs, the app constructs a Genius.com URL client-side:
      `https://genius.com/{artist}-{title}-lyrics`
-   - Slashes, spaces, and punctuation marks are stripped and replaced with hyphens to form the canonical slug, allowing users to read full lyrics and crowd-sourced song meanings on Genius.
+   - Slashes, spaces, and punctuation marks are stripped and replaced with hyphens to form the canonical slug.
+   - **Ampersand & Conjunction Mapping**: To prevent cutting off bands like "Clowns & Helden" or "Klaus & Klaus", the generator does not truncate at `&` or `,`. 
+   - **Database Spelling Mismatches**: Since Genius and Deezer metadata spellings can differ, the app incorporates a dictionary mapping known mismatches (e.g., `"Clowns & Helden"` is mapped to `"Clowns und Helden"`, `"Die Doraus Und Die Marinas"` to `"Die Doraus & Die Marinas"`, `"Spliff"` to `"Spliff (DEU)"`, and `"DöF"` to `"DÖF (AUT)"`). For all other artists, `&` is mapped to `"and"` by default, matching Genius's automatic slugifier. This ensures links work regardless of active game language settings.
+     > [!WARNING]
+     > **Experimental Feature:** These hardcoded database mappings are temporary workarounds for key NDW tracks. Do NOT expand this list as a general design pattern for other metadata discrepancies, as a hardcoded mapping list is not scalable.

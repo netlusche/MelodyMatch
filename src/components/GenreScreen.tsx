@@ -31,13 +31,13 @@ export const GenreScreen: React.FC = () => {
   ];
 
   const DE_EXTRAS = [
-    { id: 'schlager', label: 'Schlager' },
-    { id: 'ndw', label: 'NDW' },
-    { id: 'deutschpop', label: 'Deutschpop' },
-    { id: 'deutschrock', label: 'Deutschrock' },
-    { id: 'deutscher rap', label: 'Deutscher Hiphop / Rap' },
-    { id: 'ballermann', label: 'Ballermann' },
-    { id: 'partyhits', label: 'Partyhits' }
+    { id: 'schlager', translationKey: 'genre_schlager' },
+    { id: 'ndw', translationKey: 'genre_ndw' },
+    { id: 'deutschpop', translationKey: 'genre_deutschpop' },
+    { id: 'deutschrock', translationKey: 'genre_deutschrock' },
+    { id: 'deutscher rap', translationKey: 'genre_deutscher_rap' },
+    { id: 'ballermann', translationKey: 'genre_ballermann' },
+    { id: 'partyhits', translationKey: 'genre_partyhits' }
   ];
 
   const availableDecades = DECADE_GENRES.map(d => ({
@@ -45,9 +45,14 @@ export const GenreScreen: React.FC = () => {
     label: state.lang === 'de' ? d.label.de : d.label.en
   }));
 
-  const availableGenres = state.lang === 'de'
-    ? [{ id: 'all', label: 'Charts' }, ...BASE_GENRES, ...DE_EXTRAS]
-    : [{ id: 'all', label: 'Charts' }, ...BASE_GENRES];
+  const availableGenres = [
+    { id: 'all', label: 'Charts' },
+    ...BASE_GENRES,
+    ...DE_EXTRAS.map(g => ({
+      id: g.id,
+      label: (t as any)[g.translationKey] || g.id
+    }))
+  ];
 
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);

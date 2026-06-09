@@ -1,6 +1,6 @@
 export type Language = 'en' | 'de';
 export type Theme = 'default' | 'plain_white' | 'plain_dark' | 'matrix' | 'vaporwave' | 'westeros' | 'sakura' | 'lcars' | 'frutiger_aero' | 'synthwave' | 'heavy_metal' | 'post_punk' | 'rock_legends' | 'kraftwerk';
-export interface Song { id: number; title: string; artist: string; year: string; previewUrl: string; artworkUrl: string; }
+export interface Song { id: number; title: string; artist: string; year: string; previewUrl: string; artworkUrl: string; album?: string; }
 export interface PlayedSong {
   song: Song;
   player: string;

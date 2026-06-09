@@ -16,13 +16,13 @@ const PLAYLIST_MAP: Record<string, number | number[]> = {
   'indie': [9372936102, 754725481, 8716319082, 10452440062], // The Indie Café, crush <3, Indie Rock Essentials, Indie rock essentials
   'classic rock': [6046721604, 14233924321, 1306931615, 1405240385], // Rock Klassiker, Classic Rock Greatest Hits 1, Rock Essentials, 70s Rock
   'schlager': [8699026122, 2813303064, 1917690502, 11354266504, 12462638963], // Schlager Super Hits, Karneval Schlager Party, Schlagerparty, Schlager Sommer, Schlager Queens
-  'ndw': [6758361584, 1230675621, 11573856644, 10457025082], // Neue Deutsche Welle, NDW Hits, Sommer Hits - 80er, Hits - 80er
-  'deutschpop': [11242422704, 1495051201, 8668716682], // Deutschpop Super Hits, Frischer Deutschpop, Deutschpop Hits von heute
-  'deutschrock': [1956739222, 11242423484, 11909416601, 10396822102], // Deutschrock Essentials, Rock Super Hits, 2023 Rock Germany, Deutschland 00er
+  'ndw': [6758361584, 1230675621, 2734068964, 8937349862, 1106363531, 15022157843, 15344382803], // Neue Deutsche Welle, NDW Hits, Neue Deutsche Welle - NDW, NDW- Neue Deutsche Welle, ULTIMATE 80s NDW, NDW SaMu, 80er NDW
+  'deutschpop': [11242422704, 10226082322, 8668716682], // Deutschpop Super Hits, Happy Deutschpop, Deutschpop Hits von heute
+  'deutschrock': [1956739222, 6030118144, 10396822102], // Deutschrock Essentials, Deutsch Rock (Rammstein/Knorkator), Deutschland 00er
   'deutscher rap': [10578289242, 14639295721, 1043463931, 146820791, 11533942424], // Deutschrap Super Hits, Deutsche-Hits, Freitag alles neu, Deutschrap Hits, Deutschrap Essentials
-  'ballermann': [10328601542, 14950680143, 9486947662], // Endlich wieder Malle, Malle/Schlager Hits, Après Ski Hits
+  'ballermann': [10328601542, 9486947662, 4789726188, 7712049342], // Endlich wieder Malle, Après Ski Hits, Ballermann Hits Best Of, Ballermann (Markus Becker)
   'partyhits': [2097558104, 740966875, 11203091824, 8699026122, 1917690502, 10328601542], // Party Hits, Club Party Hits, Dance Hits, Schlager Super Hits, Schlagerparty, Endlich wieder Malle
-  'new wave': [8515679522, 8700369282], // New Wave Essentials & Post-Punk Essentials
+  'new wave': [8515679522, 8700369282, 3291146382, 10082108122, 4055216422], // New Wave Essentials, Post-Punk Essentials, New Wave classics, New Wave - Dark Gothic post punk, 80s Oldschool Indie. New Wave & Post-Punk Classics
   
   // Decades
   '50s': [735402575, 4020144442, 11031329462, 3954210902, 9010212882, 5958115324], // 50s Rock 'n' Roll, Billboard 50s, Rock 'n' Roll classics, 50er/60er, 50's Blues, 50's Jazz
@@ -367,6 +367,7 @@ export const fetchSongs = async (count: number, genres: string[] = ['all']): Pro
       year: '', 
       previewUrl: t.preview,
       artworkUrl: t.album.cover_big,
+      album: t.album?.title,
     }));
   } catch (error) {
     console.error("Failed to fetch songs from Deezer:", error);

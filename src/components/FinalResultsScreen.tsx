@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useGame } from '../state/GameContext';
 import { translations } from '../i18n/translations';
-import { Trophy, RotateCcw, Medal, Heart, Play, Square, Info } from 'lucide-react';
+import { Trophy, RotateCcw, Medal, Heart, Play, Square, Info, Maximize2, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { addFavorite, removeFavorite, getFavorites } from '../utils/favorites';
 import { getThemeConfettiColors } from '../utils/confettiColors';
@@ -18,6 +18,7 @@ export const FinalResultsScreen: React.FC = () => {
   const [favIds, setFavIds] = useState<number[]>([]);
   const [playingId, setPlayingId] = useState<number | null>(null);
   const [selectedSongForInfo, setSelectedSongForInfo] = useState<any | null>(null);
+  const [zoomUrl, setZoomUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleTogglePlay = (song: any) => {
@@ -160,9 +161,9 @@ export const FinalResultsScreen: React.FC = () => {
                       onClick={() => handleTogglePlay(song)} 
                       title={song.previewUrl ? (playingId === song.id ? t.pausePreview : t.playPreview) : undefined}
                       style={{ 
-                        width: 72, 
-                        height: 72, 
-                        borderRadius: '6px'
+                        width: 80, 
+                        height: 80, 
+                        borderRadius: '8px'
                       }}
                     >
                       <img src={song.artworkUrl} alt={song.title} className="cover-play-img" />
@@ -176,6 +177,18 @@ export const FinalResultsScreen: React.FC = () => {
                           </div>
                         </>
                       )}
+                      <button 
+                        type="button"
+                        className="zoom-overlay-badge"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setZoomUrl(song.artworkUrl);
+                        }}
+                        title={t.zoomHint}
+                        style={{ border: 'none', outline: 'none' }}
+                      >
+                        <Maximize2 size={10} />
+                      </button>
                     </div>
                   ) : (
                     song.previewUrl && (
@@ -183,9 +196,9 @@ export const FinalResultsScreen: React.FC = () => {
                         onClick={() => handleTogglePlay(song)}
                         title={playingId === song.id ? t.pausePreview : t.playPreview}
                         style={{
-                          width: 72,
-                          height: 72,
-                          borderRadius: '6px',
+                          width: 80,
+                          height: 80,
+                          borderRadius: '8px',
                           background: 'var(--badge-bg)',
                           border: '1px solid var(--border)',
                           cursor: 'pointer',
@@ -282,6 +295,21 @@ export const FinalResultsScreen: React.FC = () => {
           lang={state.lang}
           onClose={() => setSelectedSongForInfo(null)}
         />
+      )}
+
+      {zoomUrl && (
+        <div className="zoom-overlay" onClick={() => setZoomUrl(null)}>
+          <div className="zoom-overlay-card" onClick={e => e.stopPropagation()}>
+            <img src={zoomUrl} alt="Zoomed Album Art" className="zoom-artwork" />
+            <button 
+              type="button" 
+              className="icon-button outline zoom-close-btn"
+              onClick={() => setZoomUrl(null)}
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

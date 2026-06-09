@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../state/GameContext';
 import { translations } from '../i18n/translations';
-import { CheckCircle, XCircle, ChevronRight, Heart, Play, Square, Info } from 'lucide-react';
+import { CheckCircle, XCircle, ChevronRight, Heart, Play, Square, Info, Maximize2, X, Music } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { addFavorite, removeFavorite, isFavorite } from '../utils/favorites';
 import { getThemeConfettiColors } from '../utils/confettiColors';
@@ -19,6 +19,7 @@ export const TurnResultScreen: React.FC = () => {
   const [isFav, setIsFav] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [showZoom, setShowZoom] = useState(false);
 
   // Sync state with HTML5 audio events (play, pause, ended)
   useEffect(() => {
@@ -109,14 +110,14 @@ export const TurnResultScreen: React.FC = () => {
 
       {state.currentSong && (
         <div className="song-info-card w-full max-w-sm fade-in drop-shadow" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', borderRadius: '12px', background: 'var(--card)', border: '1px solid var(--border)', position: 'relative' }}>
-          {state.currentSong.artworkUrl && (
+          {state.currentSong.artworkUrl ? (
             <div 
               className={`cover-play-wrapper ${isPlaying ? 'playing' : ''}`}
               onClick={handleTogglePlay}
               title={isPlaying ? t.pausePreview : t.playPreview}
               style={{
-                width: 60,
-                height: 60,
+                width: 80,
+                height: 80,
                 borderRadius: '8px'
               }}
             >
@@ -127,6 +128,22 @@ export const TurnResultScreen: React.FC = () => {
               <div className="play-badge-mobile">
                 {isPlaying ? <Square size={8} fill="#fff" /> : <Play size={8} fill="#fff" />}
               </div>
+              <button 
+                type="button"
+                className="zoom-overlay-badge"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowZoom(true);
+                }}
+                title={t.zoomHint}
+                style={{ border: 'none', outline: 'none' }}
+              >
+                <Maximize2 size={10} />
+              </button>
+            </div>
+          ) : (
+            <div style={{ width: 60, height: 60, borderRadius: '8px', background: 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Music size={24} className="text-muted" />
             </div>
           )}
           <div style={{ textAlign: 'left', display: 'flex', flexDirection: 'column', overflow: 'hidden', flex: 1, paddingRight: '4.2rem' }}>
@@ -226,6 +243,21 @@ export const TurnResultScreen: React.FC = () => {
           lang={state.lang}
           onClose={() => setShowInfo(false)}
         />
+      )}
+
+      {showZoom && state.currentSong && state.currentSong.artworkUrl && (
+        <div className="zoom-overlay" onClick={() => setShowZoom(false)}>
+          <div className="zoom-overlay-card" onClick={e => e.stopPropagation()}>
+            <img src={state.currentSong.artworkUrl} alt={state.currentSong.title} className="zoom-artwork" />
+            <button 
+              type="button" 
+              className="icon-button outline zoom-close-btn"
+              onClick={() => setShowZoom(false)}
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

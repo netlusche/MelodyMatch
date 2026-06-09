@@ -19,6 +19,7 @@ A fast-paced, interactive, modern local-multiplayer music quiz built with React,
   - In-app preview playing by directly clicking the cover arts.
   - A mobile-friendly themed corner play badge indicator that pulses 3 times on mount (e.g., when opening the Liked Songs accordion or loading the scoreboard) and pulses continuously while playing, fading out on desktop hover.
   - Apple Music & Deezer search links, and list-clearing utilities.
+- **Wikipedia Summaries & Genius Lyrics**: Displays Wikipedia background information (cascading through Song -> Album -> Artist details in both German and English subdomains) and generates direct links to Genius.com for lyrics and crowd-sourced song meanings (utilizing robust, localized slugs for artist names).
 - **Genre Selection Constraints & Alerts**: Matching the visual design of the active theme, the start button goes visually inactive when no genres are selected. Pressing it triggers a beautiful glassmorphism-styled warning modal prompting the user to select at least one genre.
 - **Localization**: Full English (EN) and German (DE) localization, including region-specific genre configurations.
 

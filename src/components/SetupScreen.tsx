@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useGame } from '../state/GameContext';
 import { Player, Language, Theme, Song } from '../types';
-import { Users, Settings, Globe, ChevronRight, UserPlus, Trash2, Heart, Play, Square, ChevronDown, ChevronUp, Download, Info } from 'lucide-react';
+import { Users, Settings, Globe, ChevronRight, UserPlus, Trash2, Heart, Play, Square, ChevronDown, ChevronUp, Download, Info, Maximize2, X } from 'lucide-react';
 import { translations } from '../i18n/translations';
 import { getFavorites, removeFavorite } from '../utils/favorites';
 import packageInfo from '../../package.json';
@@ -23,6 +23,7 @@ export const SetupScreen: React.FC = () => {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [selectedSongForInfo, setSelectedSongForInfo] = useState<Song | null>(null);
+  const [zoomUrl, setZoomUrl] = useState<string | null>(null);
   const [playingId, setPlayingId] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
@@ -391,18 +392,30 @@ export const SetupScreen: React.FC = () => {
                           onClick={() => handleTogglePlay(song)}
                           title={playingId === song.id ? t.pausePreview : t.playPreview}
                           style={{ 
-                            width: '36px', 
-                            height: '36px', 
+                            width: '48px', 
+                            height: '48px', 
                             borderRadius: '6px'
                           }} 
                         >
                           <img src={song.artworkUrl} alt={song.title} className="cover-play-img" />
                           <div className="play-overlay">
-                            {playingId === song.id ? <Square size={12} fill="#fff" /> : <Play size={12} fill="#fff" />}
+                            {playingId === song.id ? <Square size={16} fill="#fff" /> : <Play size={16} fill="#fff" />}
                           </div>
                           <div className="play-badge-mobile">
                             {playingId === song.id ? <Square size={8} fill="#fff" /> : <Play size={8} fill="#fff" />}
                           </div>
+                          <button 
+                            type="button"
+                            className="zoom-overlay-badge"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setZoomUrl(song.artworkUrl);
+                            }}
+                            title={t.zoomHint}
+                            style={{ border: 'none', outline: 'none' }}
+                          >
+                            <Maximize2 size={10} />
+                          </button>
                         </div>
                       )}
                       <div className="fav-item-info">
@@ -496,6 +509,21 @@ export const SetupScreen: React.FC = () => {
           lang={lang}
           onClose={() => setShowExport(false)}
         />
+      )}
+
+      {zoomUrl && (
+        <div className="zoom-overlay" onClick={() => setZoomUrl(null)}>
+          <div className="zoom-overlay-card" onClick={e => e.stopPropagation()}>
+            <img src={zoomUrl} alt="Zoomed Album Art" className="zoom-artwork" />
+            <button 
+              type="button" 
+              className="icon-button outline zoom-close-btn"
+              onClick={() => setZoomUrl(null)}
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
