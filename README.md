@@ -61,6 +61,13 @@ A fast-paced, interactive, modern **local multiplayer music quiz** built with Re
 ### 🌐 Localization
 - Full **English** and **German** localization, including region-specific genre configurations and Wikipedia language fallback.
 
+### 📱 PWA & Installation
+- **Installable as an app** on iOS and Android — no App Store required.
+- **Offline-capable app shell**: The full UI loads instantly from cache even without a network connection. Music previews and metadata still require internet.
+- **Album art caching**: Deezer album covers are cached locally for 7 days for faster reloads.
+- **Install on iOS**: Safari → Share → "Add to Home Screen"
+- **Install on Android/Desktop**: Chrome address bar install button, or browser menu → "Install app"
+
 ---
 
 ## 🚀 Usage
@@ -70,7 +77,14 @@ A fast-paced, interactive, modern **local multiplayer music quiz** built with Re
 npm install
 npm run dev
 ```
-Runs the Vite dev server at `http://localhost:5173` with a local proxy for iTunes year queries.
+Runs the Vite dev server at `http://localhost:5173` with a local proxy for iTunes year queries. Note: the Service Worker is **not active** in dev mode — use `vite preview` to test PWA functionality locally.
+
+### Test PWA locally
+```bash
+npm run build
+npx vite preview
+```
+Serves the production build at `http://localhost:4173` with Service Worker and manifest active. Use Chrome DevTools → Application to inspect Service Worker status and manifest.
 
 ### Production Build
 ```bash

@@ -14,14 +14,15 @@
 10. [UI Components](#10-ui-components)
 11. [Themes & Canvas Animations](#11-themes--canvas-animations)
 12. [Localization](#12-localization)
-13. [Build & Deployment](#13-build--deployment)
-14. [Known Design Decisions & Constraints](#14-known-design-decisions--constraints)
+13. [PWA](#13-pwa)
+14. [Build & Deployment](#14-build--deployment)
+15. [Known Design Decisions & Constraints](#15-known-design-decisions--constraints)
 
 ---
 
 ## 1. Overview
 
-MelodyMatch is a **local multiplayer music quiz** — one device, passed between players. No account required, no backend, no app install. Players guess the title, artist, and release year of 30-second song previews fetched live from Deezer.
+MelodyMatch is a **local multiplayer music quiz** — one device, passed between players. No account required, no backend. Players guess the title, artist, and release year of 30-second song previews fetched live from Deezer. The app is installable as a PWA on iOS and Android directly from the browser.
 
 The application is a pure **static single-page app**: all API calls are made directly from the browser using JSONP (Deezer) or public REST endpoints (MusicBrainz, Wikipedia). The only optional server-side component is a thin PHP proxy for iTunes year lookups on PHP-enabled hosting.
 
@@ -39,6 +40,7 @@ The application is a pure **static single-page app**: all API calls are made dir
 | State | React `useReducer` + Context |
 | Persistence | `localStorage` |
 | APIs | Deezer (JSONP), MusicBrainz, iTunes, Wikipedia, Genius (URL only) |
+| PWA | vite-plugin-pwa + Workbox |
 
 ### Directory Structure
 
@@ -343,7 +345,59 @@ Language is set once during player setup and stored in `GameState.lang`. Changin
 
 ---
 
-## 13. Build & Deployment
+## 13. PWA
+
+MelodyMatch is a fully installable Progressive Web App, implemented with `vite-plugin-pwa` and Workbox.
+
+### Manifest
+
+`dist/manifest.webmanifest` is auto-generated from `vite.config.ts`. Key settings:
+
+| Field | Value |
+|---|---|
+| `name` | MelodyMatch |
+| `display` | `standalone` (no browser chrome when installed) |
+| `orientation` | `portrait` |
+| `theme_color` | `#6366f1` (Indigo — matches Default theme) |
+| `background_color` | `#0f0f1a` (matches default dark background) |
+| `start_url` | `.` |
+
+### Icons
+
+Three icon files in `public/` (and `dist/` after build), all derived from `og-image.png`:
+
+| File | Size | Purpose |
+|---|---|---|
+| `pwa-192.png` | 192×192 | Standard Android home screen icon |
+| `pwa-512.png` | 512×512 | Splash screen, high-res displays |
+| `pwa-maskable-512.png` | 512×512 | Android adaptive icon (safe-area masked) |
+
+### Caching Strategy (Workbox)
+
+| Resource | Strategy | Details |
+|---|---|---|
+| App shell (JS, CSS, HTML, fonts) | Precache | All assets cached at install time, served offline |
+| Deezer album artwork (`e-cdns-images.dzcdn.net`) | `CacheFirst` | Max 100 entries, 7-day expiry |
+| Deezer API / audio previews | No cache | Dynamic JSONP, external domain |
+| Wikipedia / MusicBrainz / iTunes | No cache | Dynamic, already covered by in-memory cache |
+
+The Service Worker is registered with `registerType: 'autoUpdate'` — when a new version is deployed, the SW updates automatically in the background on the next page load.
+
+### Installation
+
+- **iOS**: Safari → Share → "Add to Home Screen"
+- **Android / Desktop Chrome**: Install button in the address bar, or browser menu → "Install app"
+
+The Service Worker is **not active in development** (`npm run dev`). To test PWA functionality locally, use the production build:
+
+```bash
+npm run build && npx vite preview
+```
+
+---
+
+## 14. Build & Deployment
+
 
 ### Development
 
@@ -381,7 +435,7 @@ Semantic versioning without `v` prefix (e.g. `0.5.0`, not `v0.5.0`), matching th
 
 ---
 
-## 14. Known Design Decisions & Constraints
+## 15. Known Design Decisions & Constraints
 
 ### No Backend
 
