@@ -4,6 +4,12 @@ class AudioManager {
   private listenersRegistered = false;
   private handler = () => this.unlock();
 
+  constructor() {
+    if (typeof window !== 'undefined') {
+      this.registerUnlockListeners();
+    }
+  }
+
   getAudio(): HTMLAudioElement {
     if (!this.audio) {
       this.audio = new Audio();
@@ -19,9 +25,15 @@ class AudioManager {
     // Check if we already have a real song source set (e.g. from playSong in same gesture)
     const hasRealSrc = audio.src && !audio.src.startsWith('data:');
     if (hasRealSrc) {
-      this.isUnlocked = true;
-      console.log("Audio unlocked implicitly via real track play gesture");
-      this.removeListeners();
+      audio.play()
+        .then(() => {
+          this.isUnlocked = true;
+          console.log("Audio unlocked successfully via real track play gesture");
+          this.removeListeners();
+        })
+        .catch((err) => {
+          console.warn("Failed to unlock audio with real track:", err);
+        });
       return;
     }
     
