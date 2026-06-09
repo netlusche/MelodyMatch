@@ -77,9 +77,15 @@ class AudioManager {
       audio.src = previewUrl;
     }
     return audio.play().catch(err => {
-      console.warn("Playback failed. Re-registering unlock listeners:", err);
-      this.isUnlocked = false;
-      this.registerUnlockListeners();
+      if (err.name === 'NotAllowedError') {
+        // Autoplay policy blocked — audio context is locked, re-register unlock listeners
+        console.warn("Playback blocked by autoplay policy. Re-registering unlock listeners:", err);
+        this.isUnlocked = false;
+        this.registerUnlockListeners();
+      } else {
+        // Resource error (broken URL, network failure) — context stays unlocked
+        console.warn("Playback failed (resource/network error):", err);
+      }
       throw err;
     });
   }

@@ -822,8 +822,8 @@ export const BackgroundEffects: React.FC = () => {
           const totalBars = Math.floor(cv.width / (barWidth + barGap));
           ctx.save();
           
+          const time = Date.now() * 0.003;
           for (let i = 0; i < totalBars; i++) {
-            const time = Date.now() * 0.003;
             const wave1 = Math.sin(i * 0.05 + time) * 0.5 + 0.5;
             const wave2 = Math.cos(i * 0.12 - time * 0.8) * 0.5 + 0.5;
             const wave3 = Math.sin(i * 0.3 + time * 1.5) * 0.3 + 0.3;

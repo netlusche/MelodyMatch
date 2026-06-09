@@ -14,7 +14,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [state, dispatch] = useReducer(gameReducer, loadGameState() || initialState);
 
   useEffect(() => {
-    saveGameState(state);
+    const timer = setTimeout(() => saveGameState(state), 300);
+    return () => clearTimeout(timer);
   }, [state]);
 
   return (
