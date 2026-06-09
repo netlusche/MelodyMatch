@@ -103,6 +103,56 @@ export const cleanSongTitle = (title: string): string => {
   return clean || title;
 };
 
+export const cleanAndNormalizeTitle = (title: string): string => {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '') // remove punctuation except spaces
+    .split(/\s+/)                // split into words
+    .map(word => {
+      // Remove trailing 's' to normalize plurals/possessives
+      if (word.length > 2 && word.endsWith('s') && !word.endsWith('ss')) {
+        return word.slice(0, -1);
+      }
+      return word;
+    })
+    .filter(Boolean)
+    .join('');
+};
+
+export const generateTitleVariations = (title: string): string[] => {
+  const cleanTitle = cleanSongTitle(title);
+  const variations = new Set<string>();
+  variations.add(cleanTitle);
+
+  // 1. Straight vs Curly Apostrophes replacement
+  if (cleanTitle.includes("'") || cleanTitle.includes("’")) {
+    const straight = cleanTitle.replace(/’/g, "'");
+    const curly = cleanTitle.replace(/'/g, "’");
+    const stripped = cleanTitle.replace(/['’]/g, "");
+    variations.add(straight);
+    variations.add(curly);
+    variations.add(stripped);
+  }
+
+  // 2. If there are words ending in 's' without apostrophe, try adding it
+  const words = cleanTitle.split(/\s+/);
+  let changed = false;
+  const newWordsStraight = words.map(word => {
+    if (word.length > 2 && word.endsWith('s') && !word.endsWith('ss') && !word.includes("'") && !word.includes("’")) {
+      changed = true;
+      return word.slice(0, -1) + "'s";
+    }
+    return word;
+  });
+  if (changed) {
+    const withStraight = newWordsStraight.join(' ');
+    variations.add(withStraight);
+    variations.add(withStraight.replace(/'/g, "’"));
+  }
+
+  return Array.from(variations);
+};
+
 const cleanQueryForYearSearch = (artist: string, title: string): string => {
   const cleanTitle = cleanSongTitle(title);
   // Strip featuring artist suffixes
@@ -141,14 +191,18 @@ const cleanLuceneQuery = (str: string): string => {
 export const fetchTrackYear = async (trackId: number, title: string, artist: string): Promise<string> => {
   const cleanTitle = cleanSongTitle(title);
   const cleanArtist = artist.replace(/\s+(feat|ft)\.?\s+.*$/gi, '').trim();
+  const targetNorm = cleanAndNormalizeTitle(cleanTitle);
 
   // 1. Try MusicBrainz API as primary source (CORS-friendly, very accurate for original years)
   try {
-    const mbQuery = `artist:"${cleanLuceneQuery(cleanArtist)}" AND recording:"${cleanLuceneQuery(cleanTitle)}"`;
+    const vars = generateTitleVariations(title);
+    const recordingClauses = vars.map(v => `recording:"${cleanLuceneQuery(v)}"`).join(' OR ');
+    const mbQuery = `artist:"${cleanLuceneQuery(cleanArtist)}" AND (${recordingClauses})`;
     const mbUrl = `https://musicbrainz.org/ws/2/recording/?query=${encodeURIComponent(mbQuery)}&limit=100&fmt=json`;
     const res = await fetchWithTimeout(mbUrl, {
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'User-Agent': 'MelodyMatch/1.0.0 ( frank@example.com )'
       }
     }, 1500);
 
@@ -177,18 +231,39 @@ export const fetchTrackYear = async (trackId: number, title: string, artist: str
     console.warn("MusicBrainz year fetch failed, cascading to iTunes...", e);
   }
 
+  // Helper function to extract the earliest year from matched iTunes results
+  const getEarliestYearFromItunesResults = (results: any[]): string | null => {
+    const years: number[] = [];
+    results.forEach((r: any) => {
+      if (r.trackName && r.releaseDate) {
+        const trackClean = cleanSongTitle(r.trackName);
+        const trackNorm = cleanAndNormalizeTitle(trackClean);
+        if (trackNorm === targetNorm) {
+          const yearStr = getYearFromString(r.releaseDate);
+          if (yearStr) {
+            const yr = parseInt(yearStr, 10);
+            if (!isNaN(yr)) {
+              years.push(yr);
+            }
+          }
+        }
+      }
+    });
+    return years.length > 0 ? Math.min(...years).toString() : null;
+  };
+
   // 2. iTunes Fallback (Cascading proxies)
   const query = cleanQueryForYearSearch(artist, title);
-  const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&limit=1`;
+  const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&limit=10`;
   
   // 2.1. Try local dev proxy (/api-itunes)
-  const devUrl = `/api-itunes/search?term=${encodeURIComponent(query)}&media=music&limit=1`;
+  const devUrl = `/api-itunes/search?term=${encodeURIComponent(query)}&media=music&limit=10`;
   try {
     const res = await fetchWithTimeout(devUrl, {}, 1000);
     if (res.ok) {
       const data = await res.json();
-      if (data && data.results && data.results[0] && data.results[0].releaseDate) {
-        const year = getYearFromString(data.results[0].releaseDate);
+      if (data && data.results) {
+        const year = getEarliestYearFromItunesResults(data.results);
         if (year) {
           console.log(`Fetched original year via dev proxy for "${query}":`, year);
           return year;
@@ -201,11 +276,11 @@ export const fetchTrackYear = async (trackId: number, title: string, artist: str
 
   // 2.2. Try local PHP proxy (proxy.php) if available (for Strato production)
   try {
-    const res = await fetchWithTimeout(`./proxy.php?term=${encodeURIComponent(query)}&media=music&limit=1`, {}, 1000);
+    const res = await fetchWithTimeout(`./proxy.php?term=${encodeURIComponent(query)}&media=music&limit=10`, {}, 1000);
     if (res.ok) {
       const data = await res.json();
-      if (data && data.results && data.results[0] && data.results[0].releaseDate) {
-        const year = getYearFromString(data.results[0].releaseDate);
+      if (data && data.results) {
+        const year = getEarliestYearFromItunesResults(data.results);
         if (year) {
           console.log(`Fetched original year via local PHP proxy for "${query}":`, year);
           return year;
@@ -221,8 +296,8 @@ export const fetchTrackYear = async (trackId: number, title: string, artist: str
     const res = await fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(itunesUrl)}`, {}, 1500);
     if (res.ok) {
       const data = await res.json();
-      if (data && data.results && data.results[0] && data.results[0].releaseDate) {
-        const year = getYearFromString(data.results[0].releaseDate);
+      if (data && data.results) {
+        const year = getEarliestYearFromItunesResults(data.results);
         if (year) {
           console.log(`Fetched original year via AllOrigins for "${query}":`, year);
           return year;
