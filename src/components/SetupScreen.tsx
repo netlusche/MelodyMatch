@@ -7,6 +7,7 @@ import { getFavorites, removeFavorite } from '../utils/favorites';
 import packageInfo from '../../package.json';
 import { TrackInfoModal } from './TrackInfoModal';
 import { PlaylistExportModal } from './PlaylistExportModal';
+import { audioManager } from '../services/audio';
 
 export const SetupScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -25,7 +26,6 @@ export const SetupScreen: React.FC = () => {
   const [selectedSongForInfo, setSelectedSongForInfo] = useState<Song | null>(null);
   const [zoomUrl, setZoomUrl] = useState<string | null>(null);
   const [playingId, setPlayingId] = useState<number | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -33,8 +33,9 @@ export const SetupScreen: React.FC = () => {
 
   // Load favorites when screen mounts or when toggled
   useEffect(() => {
-    setFavoritesList(getFavorites());
-    setShowClearConfirm(false);
+    if (showFavorites) {
+      setFavoritesList(getFavorites());
+    }
   }, [showFavorites]);
 
   useEffect(() => {
@@ -66,9 +67,7 @@ export const SetupScreen: React.FC = () => {
   };
 
   const handleNext = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
+    audioManager.pause();
     const filledPlayers = players.map((p, idx) => ({ ...p, name: p.name.trim() || `Player ${idx + 1}` }));
     dispatch({
       type: 'CONTINUE_TO_GENRES',
@@ -78,33 +77,28 @@ export const SetupScreen: React.FC = () => {
 
   const handleTogglePlay = (song: Song) => {
     if (playingId === song.id) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+      audioManager.pause();
       setPlayingId(null);
     } else {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      audioRef.current = new Audio(song.previewUrl);
-      audioRef.current.play()
+      audioManager.pause();
+      audioManager.playSong(song.previewUrl, false)
         .then(() => {
-          // Playback succeeded
+          const audio = audioManager.getAudio();
+          if (audio) {
+            audio.onended = () => setPlayingId(null);
+          }
         })
         .catch(e => {
           console.warn("Preview playback failed", e);
           setPlayingId(null);
         });
-      audioRef.current.onended = () => setPlayingId(null);
       setPlayingId(song.id);
     }
   };
 
   useEffect(() => {
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+      audioManager.pause();
     };
   }, []);
 
@@ -112,9 +106,7 @@ export const SetupScreen: React.FC = () => {
     removeFavorite(id);
     setFavoritesList(getFavorites());
     if (playingId === id) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+      audioManager.pause();
       setPlayingId(null);
     }
   };
@@ -122,9 +114,7 @@ export const SetupScreen: React.FC = () => {
   const handleClearFavorites = () => {
     localStorage.removeItem('melody-match-favorites');
     setFavoritesList([]);
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
+    audioManager.pause();
     setPlayingId(null);
   };
 
@@ -386,24 +376,27 @@ export const SetupScreen: React.FC = () => {
                 <div className="favorites-list-container">
                   {favoritesList.map(song => (
                     <div key={song.id} className="fav-item-row">
-                      {song.artworkUrl && (
-                        <div 
-                          className={`cover-play-wrapper ${playingId === song.id ? 'playing' : ''}`}
-                          onClick={() => handleTogglePlay(song)}
-                          title={playingId === song.id ? t.pausePreview : t.playPreview}
-                          style={{ 
-                            width: '48px', 
-                            height: '48px', 
-                            borderRadius: '6px'
-                          }} 
-                        >
-                          <img src={song.artworkUrl} alt={song.title} className="cover-play-img" />
-                          <div className="play-overlay">
-                            {playingId === song.id ? <Square size={16} fill="#fff" /> : <Play size={16} fill="#fff" />}
-                          </div>
-                          <div className="play-badge-mobile">
-                            {playingId === song.id ? <Square size={8} fill="#fff" /> : <Play size={8} fill="#fff" />}
-                          </div>
+                        <div style={{ position: 'relative', width: '64px', height: '64px', flexShrink: 0 }}>
+                          <button 
+                            type="button"
+                            className={`cover-play-wrapper ${playingId === song.id ? 'playing' : ''}`}
+                            onClick={() => handleTogglePlay(song)}
+                            title={playingId === song.id ? t.pausePreview : t.playPreview}
+                            style={{ 
+                              width: '100%', 
+                              height: '100%', 
+                              borderRadius: '8px',
+                              cursor: 'pointer'
+                            }} 
+                          >
+                            <img src={song.artworkUrl} alt={song.title} className="cover-play-img" />
+                            <div className="play-overlay">
+                              {playingId === song.id ? <Square size={16} fill="#fff" /> : <Play size={16} fill="#fff" />}
+                            </div>
+                            <div className="play-badge-mobile">
+                              {playingId === song.id ? <Square size={8} fill="#fff" /> : <Play size={8} fill="#fff" />}
+                            </div>
+                          </button>
                           <button 
                             type="button"
                             className="zoom-overlay-badge"
@@ -417,7 +410,6 @@ export const SetupScreen: React.FC = () => {
                             <Maximize2 size={10} />
                           </button>
                         </div>
-                      )}
                       <div className="fav-item-info">
                         <div className="fav-item-title">{song.title}</div>
                         <div className="fav-item-details">{song.artist} ({song.year})</div>

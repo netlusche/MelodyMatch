@@ -58,8 +58,9 @@ class AudioManager {
     this.listenersRegistered = false;
   }
 
-  playSong(previewUrl: string): Promise<void> {
+  playSong(previewUrl: string, loop = true): Promise<void> {
     const audio = this.getAudio();
+    audio.loop = loop;
     if (audio.src !== previewUrl) {
       audio.src = previewUrl;
     }

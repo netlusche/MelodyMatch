@@ -1006,6 +1006,12 @@ body {
   cursor: pointer;
   flex-shrink: 0;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  /* Reset button defaults in case this is a button element */
+  border: none;
+  background: transparent;
+  padding: 0;
+  outline: none;
+  display: block;
 }
 
 .cover-play-wrapper:hover {
@@ -1229,7 +1235,7 @@ body {
 }
 
 /* Zoom Button Overlay on List Cover Art */
-.cover-play-wrapper .zoom-overlay-badge {
+.zoom-overlay-badge {
   position: absolute;
   top: 3px;
   right: 3px;
@@ -1249,7 +1255,7 @@ body {
   cursor: pointer;
 }
 
-.cover-play-wrapper .zoom-overlay-badge:hover {
+.zoom-overlay-badge:hover {
   opacity: 1;
   background: var(--primary);
   border-color: transparent;

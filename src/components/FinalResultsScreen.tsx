@@ -6,6 +6,7 @@ import confetti from 'canvas-confetti';
 import { addFavorite, removeFavorite, getFavorites } from '../utils/favorites';
 import { getThemeConfettiColors } from '../utils/confettiColors';
 import { TrackInfoModal } from './TrackInfoModal';
+import { audioManager } from '../services/audio';
 
 export const FinalResultsScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -19,38 +20,32 @@ export const FinalResultsScreen: React.FC = () => {
   const [playingId, setPlayingId] = useState<number | null>(null);
   const [selectedSongForInfo, setSelectedSongForInfo] = useState<any | null>(null);
   const [zoomUrl, setZoomUrl] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleTogglePlay = (song: any) => {
     if (!song.previewUrl) return;
     if (playingId === song.id) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+      audioManager.pause();
       setPlayingId(null);
     } else {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      audioRef.current = new Audio(song.previewUrl);
-      audioRef.current.play()
+      audioManager.pause();
+      audioManager.playSong(song.previewUrl, false)
         .then(() => {
-          // Playback succeeded
+          const audio = audioManager.getAudio();
+          if (audio) {
+            audio.onended = () => setPlayingId(null);
+          }
         })
         .catch(e => {
           console.warn("Preview playback failed", e);
           setPlayingId(null);
         });
-      audioRef.current.onended = () => setPlayingId(null);
       setPlayingId(song.id);
     }
   };
 
   useEffect(() => {
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+      audioManager.pause();
     };
   }, []);
 
@@ -97,9 +92,7 @@ export const FinalResultsScreen: React.FC = () => {
 
   const handlePlayAgain = () => {
     if (isTransitioning) return;
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
+    audioManager.pause();
     setIsTransitioning(true);
     dispatch({ type: 'PLAY_AGAIN' });
   };
@@ -156,27 +149,31 @@ export const FinalResultsScreen: React.FC = () => {
               return (
                 <div key={song.id} className="history-song-card" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', borderRadius: '12px', background: 'var(--card)', border: '1px solid var(--border)', position: 'relative' }}>
                   {song.artworkUrl ? (
-                    <div 
-                      className={`cover-play-wrapper ${playingId === song.id ? 'playing' : ''}`}
-                      onClick={() => handleTogglePlay(song)} 
-                      title={song.previewUrl ? (playingId === song.id ? t.pausePreview : t.playPreview) : undefined}
-                      style={{ 
-                        width: 80, 
-                        height: 80, 
-                        borderRadius: '8px'
-                      }}
-                    >
-                      <img src={song.artworkUrl} alt={song.title} className="cover-play-img" />
-                      {song.previewUrl && (
-                        <>
-                          <div className="play-overlay">
-                            {playingId === song.id ? <Square size={20} fill="#fff" /> : <Play size={20} fill="#fff" />}
-                          </div>
-                          <div className="play-badge-mobile">
-                            {playingId === song.id ? <Square size={8} fill="#fff" /> : <Play size={8} fill="#fff" />}
-                          </div>
-                        </>
-                      )}
+                    <div style={{ position: 'relative', width: 80, height: 80, flexShrink: 0 }}>
+                      <button 
+                        type="button"
+                        className={`cover-play-wrapper ${playingId === song.id ? 'playing' : ''}`}
+                        onClick={() => handleTogglePlay(song)} 
+                        title={song.previewUrl ? (playingId === song.id ? t.pausePreview : t.playPreview) : undefined}
+                        style={{ 
+                          width: '100%', 
+                          height: '100%', 
+                          borderRadius: '8px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <img src={song.artworkUrl} alt={song.title} className="cover-play-img" />
+                        {song.previewUrl && (
+                          <>
+                            <div className="play-overlay">
+                              {playingId === song.id ? <Square size={20} fill="#fff" /> : <Play size={20} fill="#fff" />}
+                            </div>
+                            <div className="play-badge-mobile">
+                              {playingId === song.id ? <Square size={8} fill="#fff" /> : <Play size={8} fill="#fff" />}
+                            </div>
+                          </>
+                        )}
+                      </button>
                       <button 
                         type="button"
                         className="zoom-overlay-badge"
