@@ -14,11 +14,178 @@ When the user configures the game and clicks "Start Game", the required song poo
 1. **Charts vs. Specific Genres/Decades**:
    - If **Charts** (key: `'all'`) is selected, it queries Deezer's global charts:
      `https://api.deezer.com/chart/0/tracks?limit=300`
-   - If a main genre (e.g., *Pop*, *Rock*, *Heavy Metal*) is selected, it queries the genre-specific chart using `GENRE_MAP`:
-     `https://api.deezer.com/chart/{genreId}/tracks?limit=300`
-   - If a sub-genre (e.g., *Schlager*, *NDW*, *Indie*) or a decade (e.g., *50s*, *60s*, *70s*, *80s*, *90s*, *2000+*) is selected, it maps it to multiple curated editorial and official playlist IDs in `PLAYLIST_MAP`.
+   - Genre resolution follows a priority order: `all` → `GENRE_MAP` → `PLAYLIST_MAP` → text search fallback.
+
+### GENRE_MAP
+
+`GENRE_MAP` maps a genre key to a Deezer genre ID and queries the genre-specific chart endpoint:
+`https://api.deezer.com/chart/{genreId}/tracks?limit=300`
+
+| Genre | Deezer Genre ID | Notes |
+|---|---|---|
+| `hip-hop` | 116 | Hip-Hop charts are consistently genre-pure on Deezer |
+| `heavy metal` | 464 | Metal charts rarely contain unrelated content |
+
+**Why only two genres remain in GENRE_MAP:**
+
+Deezer's genre charts reflect real-time streaming popularity within a broadly defined genre bucket. The categorization is driven by what labels submit to Deezer's catalog system — not by musical criteria. In practice this causes significant **genre pollution** for several genres:
+
+- **Rock (152)**: Schlager and crossover pop tracks frequently appear in Deezer's Rock chart because labels file certain acts under "Rock" for chart purposes.
+- **Pop (132)**: The chart is heavily skewed toward whatever is currently trending globally, with no historical depth — a pure top-40 feed rather than a representative Pop pool.
+- **Electronic (106)**: Deezer's "Electro" bucket is very broad, mixing mainstream EDM, pop-EDM crossovers, and ambient in unpredictable proportions.
+- **R&B (165)**: R&B/Soul/Pop crossover is common at the chart level; the pool lacks variety across eras.
+- **Alternative (85)**: Deezer uses "Alternative" as a catch-all for anything that doesn't fit a primary genre — making it one of the least genre-coherent chart buckets.
+
+For these five genres, switching to `PLAYLIST_MAP` with editorially curated playlists gives full control over song pool composition, historical coverage, and genre purity. Hip-Hop and Heavy Metal were assessed as low-risk (their Deezer charts are relatively sortenrein) and kept in `GENRE_MAP` for simplicity.
+
+### PLAYLIST_MAP
+
+`PLAYLIST_MAP` maps a genre or decade key to one or more Deezer playlist IDs. All playlists for a genre are fetched in parallel using `Promise.all`:
+`https://api.deezer.com/playlist/{playlistId}/tracks?limit=300`
+
    - **Parallel Fetching**: The tracklists for all mapped playlist IDs are fetched in parallel using `Promise.all` to optimize loading times:
      `https://api.deezer.com/playlist/{playlistId}/tracks?limit=300`
+
+### PLAYLIST_MAP Reference
+
+> **Key:** ✅ Official (Deezer editorial/curated) · ⚠️ Community (user-created, may disappear)
+> 
+> **Est. unique songs** assumes ~50% overlap between playlists within the same genre. Actual pool size depends on track availability at runtime.
+
+#### 🎸 Rock (~500 unique songs, 11 playlists)
+| ID | Title | Tracks | Type |
+|---|---|---|---|
+| 11242423484 | Rock Super Hits | ~100 | ✅ Deezer DE Editor |
+| 752286631 | Rock Hits | ~65 | ✅ Deezer Rock Editor |
+| 3126664682 | Rock Road Trip | ~80 | ✅ Deezer Rock Editor |
+| 1419215845 | 2000s Rock | ~50 | ✅ Deezer Rock Editor |
+| 1057779131 | 2010s Rock | ~50 | ✅ Deezer Rock Editor |
+| 8621268482 | 80s Rock | ~50 | ✅ Deezer Rock Editor |
+| 1728093421 | 90s Rock | ~50 | ✅ Deezer Rock Editor |
+| 13693489781 | 2020s Rock | ~99 | ✅ Deezer Rock Editor |
+| 11335739484 | Modern Rock Essentials | ~100 | ✅ Deezer Rock Editor |
+| 761604441 | Hard Rock Essentials | ~50 | ✅ Deezer Rock Editor |
+| 11801167321 | Rock Classics 60s–80s | ~300 | ⚠️ Community |
+
+#### 🎤 Pop (~500 unique songs, 10 playlists)
+| ID | Title | Tracks | Type |
+|---|---|---|---|
+| 1036183001 | Pop Essentials | ~80 | ✅ Deezer Pop Editor |
+| 8326097522 | 00s Pop | ~80 | ✅ Deezer Pop Editor |
+| 8282573142 | 10s Pop | ~100 | ✅ Deezer Pop Editor |
+| 1479458365 | Happy Hits | ~70 | ✅ Deezer Pop & Hits Editor |
+| 2228601362 | Fresh Pop | ~80 | ✅ Deezer Pop & Hits Editor |
+| 1282483245 | Pop All Stars | ~50 | ✅ Deezer Pop & Hits Editor |
+| 4888783264 | Pop Rewind | ~80 | ✅ Deezer Pop Editor |
+| 1977689462 | 00s Party Hits | ~80 | ✅ Deezer Pop Editor |
+| 5311155022 | Top Hits 2012 | ~60 | ✅ Deezer Best Of |
+| 5339620562 | Top Hits 2010 | ~60 | ✅ Deezer Best Of |
+
+#### 🎛️ Electronic (~300 unique songs, 8 playlists)
+| ID | Title | Tracks | Type |
+|---|---|---|---|
+| 3801761042 | Electronic Essentials | ~50 | ✅ Deezer Electronic Editor |
+| 1902101402 | Electronic Hits | ~100 | ✅ Deezer Dance & EDM Editor |
+| 4613753548 | Dance Essentials | ~80 | ✅ Deezer Dance & EDM Editor |
+| 6237312204 | Dance Party Classics | ~70 | ✅ Deezer Dance & EDM Editor |
+| 13577379741 | House Party Classics | ~50 | ✅ Deezer Dance & EDM Editor |
+| 10578670022 | Techno Essentials | ~50 | ✅ Deezer Dance & EDM Editor |
+| 8962764402 | Trip-Hop Essentials | ~70 | ✅ Deezer Electronic Editor |
+| 14787069183 | 90er Electronic Essentials | ~98 | ✅ Deezer |
+
+#### 🎷 R&B (~300 unique songs, 10 playlists)
+| ID | Title | Tracks | Type |
+|---|---|---|---|
+| 1314725125 | R&B Essentials | ~52 | ✅ Deezer R&B Editor |
+| 1999466402 | R&B Hits | ~50 | ✅ Deezer R&B Editor |
+| 2021626162 | 2000s R&B | ~60 | ✅ Deezer R&B Editor |
+| 3196481502 | Chill R&B | ~51 | ✅ Deezer R&B Editor |
+| 4160013622 | Women of R&B | ~76 | ✅ Deezer R&B Editor |
+| 5411628342 | 2010s R&B | ~50 | ✅ Deezer R&B Editor |
+| 1699545511 | R&B Rewind | ~50 | ✅ Deezer R&B Editor |
+| 5014738124 | 90s R&B | ~50 | ✅ Deezer R&B Editor |
+| 8869955482 | Slow Jam Essentials | ~51 | ✅ Deezer R&B Editor |
+| 3166040342 | RnB Classics | ~205 | ⚠️ Community |
+
+#### 🌀 Alternative (~400 unique songs, 9 playlists)
+| ID | Title | Tracks | Type |
+|---|---|---|---|
+| 668126235 | Alternative Essentials | ~50 | ✅ Deezer Alternative Editor |
+| 5337198442 | 90s Alternative | ~50 | ✅ Deezer Alternative Editor |
+| 7966514882 | alt 50 | ~60 | ✅ Deezer Alternative Editor |
+| 1126774471 | Alt Pop | ~100 | ✅ Deezer Alternative Editor |
+| 1402845615 | New Alternative | ~150 | ✅ Deezer Alternative Editor |
+| 760160361 | Indie Rock Now | ~80 | ✅ Deezer Alternative Editor |
+| 8971696142 | Synth Pop Essentials | ~50 | ✅ Deezer Alternative Editor |
+| 1306978785 | Hot New Rock | ~170 | ✅ Deezer Rock Editor |
+| 127260811 | Alternative Attack | ~523 | ⚠️ Community |
+
+#### 🎵 Indie (~200 unique songs, 4 playlists)
+| ID | Title | Tracks | Type |
+|---|---|---|---|
+| 9372936102 | The Indie Café | ~100 | ✅ Deezer Alternative Editor |
+| 754725481 | crush <3 | ~varies | ✅ Deezer |
+| 8716319082 | Indie Rock Essentials | ~50 | ✅ Deezer Alternative Editor |
+| 10452440062 | Indie Rock Essentials (alt) | ~50 | ✅ Deezer |
+
+#### 🎸 Classic Rock (~200 unique songs, 4 playlists)
+| ID | Title | Tracks | Type |
+|---|---|---|---|
+| 6046721604 | Rock Klassiker | ~varies | ✅ Deezer DE Editor |
+| 14233924321 | Classic Rock Greatest Hits 1 | ~varies | ✅ Deezer |
+| 1306931615 | Rock Essentials | ~100 | ✅ Deezer Rock Editor |
+| 1405240385 | 70s Rock | ~50 | ✅ Deezer Rock Editor |
+
+#### 🌊 New Wave / Post-Punk (~200 unique songs, 5 playlists)
+| ID | Title | Tracks | Type |
+|---|---|---|---|
+| 8515679522 | New Wave Essentials | ~50 | ✅ Deezer Alternative Editor |
+| 8700369282 | Post-Punk Essentials | ~50 | ✅ Deezer Alternative Editor |
+| 3291146382 | New Wave Classics | ~varies | ✅ Deezer |
+| 10082108122 | New Wave – Dark Gothic Post-Punk | ~varies | ✅ Deezer |
+| 4055216422 | 80s Oldschool Indie / New Wave | ~varies | ✅ Deezer |
+
+#### 🇩🇪 NDW (~200 unique songs, 7 playlists)
+| ID | Title | Tracks | Type |
+|---|---|---|---|
+| 6758361584 | Neue Deutsche Welle | ~varies | ✅ Deezer |
+| 1230675621 | NDW Hits | ~varies | ✅ Deezer |
+| 2734068964 | Neue Deutsche Welle – NDW | ~varies | ✅ Deezer |
+| 8937349862 | NDW – Neue Deutsche Welle | ~varies | ✅ Deezer |
+| 1106363531 | ULTIMATE 80s NDW | ~varies | ⚠️ Community |
+| 15022157843 | NDW SaMu | ~varies | ⚠️ Community |
+| 15344382803 | 80er NDW | ~varies | ⚠️ Community |
+
+#### 🎤 Schlager (~200 unique songs, 5 playlists)
+| ID | Title | Tracks | Type |
+|---|---|---|---|
+| 8699026122 | Schlager Super Hits | ~varies | ✅ Deezer DE Editor |
+| 2813303064 | Karneval Schlager Party | ~varies | ✅ Deezer |
+| 1917690502 | Schlagerparty | ~varies | ✅ Deezer |
+| 11354266504 | Schlager Sommer | ~varies | ✅ Deezer DE Editor |
+| 12462638963 | Schlager Queens | ~varies | ✅ Deezer DE Editor |
+
+#### 🎵 Deutschpop, Deutschrock, Deutscher Rap, Ballermann, Partyhits
+| Genre | IDs | Type |
+|---|---|---|
+| Deutschpop | 11242422704, 10226082322, 8668716682 | ✅ Deezer DE |
+| Deutschrock | 1956739222, 6030118144, 10396822102 | ✅ Deezer DE |
+| Deutscher Rap | 10578289242, 14639295721, 1043463931, 146820791, 11533942424 | ✅ Deezer DE |
+| Ballermann | 10328601542, 9486947662, 4789726188, 7712049342 | ✅ / ⚠️ mixed |
+| Partyhits | 2097558104, 740966875, 11203091824, 8699026122, 1917690502, 10328601542 | ✅ / ⚠️ mixed |
+
+#### 📅 Decades (6 playlists each, all curated)
+| Decade | IDs | Type |
+|---|---|---|
+| 50s | 735402575, 4020144442, 11031329462, 3954210902, 9010212882, 5958115324 | ✅ Deezer |
+| 60s | 620264073, 1437011185, 8962730322, 14597757781, 8181759022, 3566625202, 11031329462 | ✅ Deezer |
+| 70s | 1470022445, 8877326262, 5605928862, 57280214, 1319793647, 7130870324 | ✅ Deezer |
+| 80s | 867825522, 1913763402, 11384036324, 6208592984, 8512471762, 8873745702, 8403360702 | ✅ Deezer |
+| 90s | 878989033, 3829647662, 7852252022, 8873744282, 8403350722, 969361861 | ✅ Deezer |
+| 2000+ | 248297032, 715215865, 14917741483, 9100953002, 14285831341, 12272270431, 11308515444 | ✅ Deezer |
+
+> **Note on community playlists:** If a community playlist is no longer available at runtime, the JSONP request returns an empty array and is silently skipped. The remaining playlists fill the pool. No error is shown to the user.
+
    - If no map matches, it falls back to a standard text search query:
      `https://api.deezer.com/search?q={term}&limit=300`
    - **Top Charts Fallback**: If the total count of deduplicated unique songs is less than the requested `count`, the app automatically queries Deezer's global top charts (`/chart/0/tracks?limit=300`) to fill the remaining slots.

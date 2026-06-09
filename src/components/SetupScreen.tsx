@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useGame } from '../state/GameContext';
 import { Player, Language, Theme, Song } from '../types';
-import { Users, Settings, Globe, ChevronRight, UserPlus, Trash2, Heart, Play, Square, ChevronDown, ChevronUp, Download, Info, Maximize2, X } from 'lucide-react';
+import { Users, Settings, Globe, ChevronRight, UserPlus, Trash2, Heart, Play, Square, ChevronDown, ChevronUp, Download, Info, Maximize2, X, Expand } from 'lucide-react';
 import { translations } from '../i18n/translations';
 import { getFavorites, removeFavorite } from '../utils/favorites';
 import packageInfo from '../../package.json';
 import { TrackInfoModal } from './TrackInfoModal';
 import { PlaylistExportModal } from './PlaylistExportModal';
+import { FavoritesModal } from './FavoritesModal';
 import { audioManager } from '../services/audio';
 
 export const SetupScreen: React.FC = () => {
@@ -20,6 +21,7 @@ export const SetupScreen: React.FC = () => {
   );
 
   const [showFavorites, setShowFavorites] = useState(false);
+  const [showFavoritesModal, setShowFavoritesModal] = useState(false);
   const [favoritesList, setFavoritesList] = useState<Song[]>([]);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showExport, setShowExport] = useState(false);
@@ -354,7 +356,18 @@ export const SetupScreen: React.FC = () => {
                   </div>
                 ) : (
                   <div style={{ display: 'flex', gap: '0.5rem', alignSelf: 'flex-end' }}>
-                    <button 
+                    {favoritesList.length > 3 && (
+                      <button
+                        type="button"
+                        className="option-button outline sm"
+                        style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem', minHeight: '32px', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                        onClick={() => setShowFavoritesModal(true)}
+                      >
+                        <Expand size={14} />
+                        <span>{t.playerBtn}</span>
+                      </button>
+                    )}
+                    <button
                       type="button"
                       className="option-button primary outline sm"
                       style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem', minHeight: '32px', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
@@ -495,8 +508,18 @@ export const SetupScreen: React.FC = () => {
         />
       )}
 
+      {showFavoritesModal && (
+        <FavoritesModal
+          songs={favoritesList}
+          lang={lang}
+          onClose={() => setShowFavoritesModal(false)}
+          onListChange={setFavoritesList}
+          onZoom={(url) => { setShowFavoritesModal(false); setZoomUrl(url); }}
+        />
+      )}
+
       {showExport && favoritesList.length > 0 && (
-        <PlaylistExportModal 
+        <PlaylistExportModal
           songs={favoritesList}
           lang={lang}
           onClose={() => setShowExport(false)}

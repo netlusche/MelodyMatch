@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useGame } from '../state/GameContext';
 import { translations } from '../i18n/translations';
-import { Trophy, RotateCcw, Medal, Heart, Play, Square, Info, Maximize2, X } from 'lucide-react';
+import { Trophy, RotateCcw, Medal, Heart, Play, Square, Info, Maximize2, X, Expand } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { addFavorite, removeFavorite, getFavorites } from '../utils/favorites';
 import { getThemeConfettiColors } from '../utils/confettiColors';
 import { TrackInfoModal } from './TrackInfoModal';
+import { RoundReplayModal } from './RoundReplayModal';
 import { audioManager } from '../services/audio';
 
 export const FinalResultsScreen: React.FC = () => {
@@ -17,6 +18,7 @@ export const FinalResultsScreen: React.FC = () => {
   const winner = sortedPlayers[0];
 
   const [favIds, setFavIds] = useState<number[]>([]);
+  const [showReplayModal, setShowReplayModal] = useState(false);
   const [playingId, setPlayingId] = useState<number | null>(null);
   const [selectedSongForInfo, setSelectedSongForInfo] = useState<any | null>(null);
   const [zoomUrl, setZoomUrl] = useState<string | null>(null);
@@ -127,7 +129,16 @@ export const FinalResultsScreen: React.FC = () => {
         <div className="played-songs-history mt-3 w-full">
           <h3 className="section-title" style={{ fontSize: '1rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Heart size={16} fill="currentColor" className="text-danger" />
-            <span>{t.playedSongs}</span>
+            <span style={{ flex: 1 }}>{t.playedSongs}</span>
+            <button
+              type="button"
+              className="option-button outline sm"
+              style={{ fontSize: '0.78rem', padding: '0.2rem 0.6rem', minHeight: '28px', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+              onClick={() => setShowReplayModal(true)}
+            >
+              <Expand size={13} />
+              <span>{state.lang === 'de' ? 'Player' : 'Player'}</span>
+            </button>
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '260px', overflowY: 'auto', paddingRight: '4px' }}>
             {state.history.map((playedSong) => {
@@ -286,8 +297,20 @@ export const FinalResultsScreen: React.FC = () => {
         </button>
       </div>
 
+      {showReplayModal && (
+        <RoundReplayModal
+          history={state.history.map((h: any) => ({
+            song: h.song ?? h,
+            player: h.player,
+            results: h.results,
+          }))}
+          lang={state.lang as 'en' | 'de'}
+          onClose={() => setShowReplayModal(false)}
+        />
+      )}
+
       {selectedSongForInfo && (
-        <TrackInfoModal 
+        <TrackInfoModal
           song={selectedSongForInfo}
           lang={state.lang}
           onClose={() => setSelectedSongForInfo(null)}

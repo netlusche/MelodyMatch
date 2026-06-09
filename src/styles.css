@@ -266,6 +266,19 @@ body {
   border: 2px dashed var(--border);
 }
 
+.option-button.primary.outline {
+  background: transparent;
+  border: 2px dashed var(--primary);
+  color: var(--primary);
+  box-shadow: none;
+}
+
+.option-button.primary.outline:hover {
+  background: rgba(var(--primary-rgb, 99, 102, 241), 0.08);
+  filter: none;
+  box-shadow: none;
+}
+
 .option-button.large {
   padding: 1rem 1.5rem;
   font-size: 1.15rem;
@@ -903,9 +916,15 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  max-height: 180px;
+  max-height: 264px;
   overflow-y: auto;
   padding-right: 4px;
+  transition: max-height 0.3s ease;
+}
+
+.favorites-list-container.expanded {
+  max-height: none;
+  overflow-y: visible;
 }
 
 .fav-item-row {

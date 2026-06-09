@@ -3,16 +3,16 @@ import { normalizeString } from '../utils/stringUtils';
 import { shuffleArray } from '../utils/arrayUtils';
 
 const GENRE_MAP: Record<string, number> = {
-  'pop': 132,
-  'rock': 152,
   'hip-hop': 116,
-  'electronic': 106, // Electro
-  'r&b': 165,        // R&B
-  'alternative': 85, // Alternative
-  'heavy metal': 464, // Heavy Metal
+  'heavy metal': 464,
 };
 
 const PLAYLIST_MAP: Record<string, number | number[]> = {
+  'rock': [11242423484, 752286631, 3126664682, 1419215845, 1057779131, 8621268482, 1728093421, 13693489781, 11335739484, 761604441, 11801167321], // Rock Super Hits, Rock Hits, Rock Road Trip, 2000s Rock, 2010s Rock, 80s Rock, 90s Rock, 2020s Rock, Modern Rock Essentials, Hard Rock Essentials, Rock Classics 60s-80s
+  'pop': [1036183001, 8326097522, 8282573142, 1479458365, 2228601362, 1282483245, 4888783264, 1977689462, 5311155022, 5339620562], // Pop Essentials, 00s Pop, 10s Pop, Happy Hits, Fresh Pop, Pop All Stars, Pop Rewind, 00s Party Hits, Top Hits 2012, Top Hits 2010
+  'electronic': [3801761042, 1902101402, 4613753548, 6237312204, 13577379741, 10578670022, 8962764402, 14787069183], // Electronic Essentials, Electronic Hits, Dance Essentials, Dance Party Classics, House Party Classics, Techno Essentials, Trip-Hop Essentials, 90er Electronic Essentials
+  'r&b': [1314725125, 1999466402, 2021626162, 3196481502, 4160013622, 5411628342, 1699545511, 5014738124, 8869955482, 3166040342], // R&B Essentials, R&B Hits, 2000s R&B, Chill R&B, Women of R&B, 2010s R&B, R&B Rewind, 90s R&B, Slow Jam Essentials, RnB Classics
+  'alternative': [668126235, 5337198442, 7966514882, 1126774471, 1402845615, 760160361, 8971696142, 1306978785, 127260811], // Alternative Essentials, 90s Alternative, alt 50, Alt Pop, New Alternative, Indie Rock Now, Synth Pop Essentials, Hot New Rock, Alternative Attack
   'indie': [9372936102, 754725481, 8716319082, 10452440062], // The Indie Café, crush <3, Indie Rock Essentials, Indie rock essentials
   'classic rock': [6046721604, 14233924321, 1306931615, 1405240385], // Rock Klassiker, Classic Rock Greatest Hits 1, Rock Essentials, 70s Rock
   'schlager': [8699026122, 2813303064, 1917690502, 11354266504, 12462638963], // Schlager Super Hits, Karneval Schlager Party, Schlagerparty, Schlager Sommer, Schlager Queens
