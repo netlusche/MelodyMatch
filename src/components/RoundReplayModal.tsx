@@ -4,15 +4,10 @@ import { translations } from '../i18n/translations';
 import { audioManager } from '../services/audio';
 import { addFavorite, removeFavorite, getFavorites } from '../utils/favorites';
 import { TrackInfoModal } from './TrackInfoModal';
-
-interface PlayedSongEntry {
-  song: any;
-  player?: string;
-  results?: { title: number; artist: number; year: number };
-}
+import { Song, PlayedSong } from '../types';
 
 interface RoundReplayModalProps {
-  history: PlayedSongEntry[];
+  history: PlayedSong[];
   lang: 'en' | 'de';
   onClose: () => void;
 }
@@ -21,7 +16,7 @@ export const RoundReplayModal: React.FC<RoundReplayModalProps> = ({ history, lan
   const t = translations[lang] || translations.en;
   const [playingId, setPlayingId] = useState<number | null>(null);
   const [favIds, setFavIds] = useState<number[]>([]);
-  const [selectedSongForInfo, setSelectedSongForInfo] = useState<any | null>(null);
+  const [selectedSongForInfo, setSelectedSongForInfo] = useState<Song | null>(null);
 
   useEffect(() => {
     setFavIds(getFavorites().map(s => s.id));
@@ -32,7 +27,7 @@ export const RoundReplayModal: React.FC<RoundReplayModalProps> = ({ history, lan
     ? history.find(h => h.song.id === playingId)?.song ?? null
     : null;
 
-  const handleTogglePlay = (song: any) => {
+  const handleTogglePlay = (song: Song) => {
     if (!song.previewUrl) return;
     if (playingId === song.id) {
       audioManager.pause();
@@ -49,7 +44,7 @@ export const RoundReplayModal: React.FC<RoundReplayModalProps> = ({ history, lan
     }
   };
 
-  const handleToggleFav = (song: any) => {
+  const handleToggleFav = (song: Song) => {
     if (favIds.includes(song.id)) {
       removeFavorite(song.id);
       setFavIds(ids => ids.filter(id => id !== song.id));

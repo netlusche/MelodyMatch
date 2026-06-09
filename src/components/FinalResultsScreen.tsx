@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGame } from '../state/GameContext';
 import { translations } from '../i18n/translations';
+import { Song, PlayedSong } from '../types';
 import { Trophy, RotateCcw, Medal, Heart, Play, Square, Info, Maximize2, X, Expand } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { addFavorite, removeFavorite, getFavorites } from '../utils/favorites';
@@ -20,10 +21,10 @@ export const FinalResultsScreen: React.FC = () => {
   const [favIds, setFavIds] = useState<number[]>([]);
   const [showReplayModal, setShowReplayModal] = useState(false);
   const [playingId, setPlayingId] = useState<number | null>(null);
-  const [selectedSongForInfo, setSelectedSongForInfo] = useState<any | null>(null);
+  const [selectedSongForInfo, setSelectedSongForInfo] = useState<Song | null>(null);
   const [zoomUrl, setZoomUrl] = useState<string | null>(null);
 
-  const handleTogglePlay = (song: any) => {
+  const handleTogglePlay = (song: Song) => {
     if (!song.previewUrl) return;
     if (playingId === song.id) {
       audioManager.pause();
@@ -55,7 +56,7 @@ export const FinalResultsScreen: React.FC = () => {
     setFavIds(getFavorites().map(s => s.id));
   }, []);
 
-  const handleToggleFav = (song: any) => {
+  const handleToggleFav = (song: Song) => {
     if (favIds.includes(song.id)) {
       removeFavorite(song.id);
       setFavIds(favIds.filter(id => id !== song.id));
@@ -89,6 +90,14 @@ export const FinalResultsScreen: React.FC = () => {
     };
     frame();
   }, [state.theme]);
+
+  const formatPointsBreakdown = (res: PlayedSong['results']) => {
+    const parts: string[] = [];
+    if (res.title > 0) parts.push(`${t.titleLabel} (+${res.title})`);
+    if (res.artist > 0) parts.push(`${t.artistLabel} (+${res.artist})`);
+    if (res.year > 0) parts.push(`${t.yearLabel} (+${res.year})`);
+    return parts.length > 0 ? parts.join(', ') : t.noneLabel;
+  };
 
   const [isTransitioning, setIsTransitioning] = React.useState(false);
 
@@ -142,20 +151,12 @@ export const FinalResultsScreen: React.FC = () => {
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '260px', overflowY: 'auto', paddingRight: '4px' }}>
             {state.history.map((playedSong) => {
-              // Support legacy history items that might be direct Song objects
-              const song = (playedSong as any).song ? (playedSong as any).song : playedSong;
-              const player = (playedSong as any).player || '';
-              const results = (playedSong as any).results;
+              // Support legacy localStorage entries that predate the PlayedSong shape
+              const entry = playedSong as PlayedSong;
+              const song: Song = entry.song ?? (playedSong as unknown as Song);
+              const player = entry.player || '';
+              const results = entry.results;
               const isFav = favIds.includes(song.id);
-              
-              const formatPointsBreakdown = (res: any) => {
-                if (!res) return t.noneLabel;
-                const parts: string[] = [];
-                if (res.title > 0) parts.push(`${t.titleLabel} (+${res.title})`);
-                if (res.artist > 0) parts.push(`${t.artistLabel} (+${res.artist})`);
-                if (res.year > 0) parts.push(`${t.yearLabel} (+${res.year})`);
-                return parts.length > 0 ? parts.join(', ') : t.noneLabel;
-              };
 
               return (
                 <div key={song.id} className="history-song-card" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', borderRadius: '12px', background: 'var(--card)', border: '1px solid var(--border)', position: 'relative' }}>
@@ -299,11 +300,7 @@ export const FinalResultsScreen: React.FC = () => {
 
       {showReplayModal && (
         <RoundReplayModal
-          history={state.history.map((h: any) => ({
-            song: h.song ?? h,
-            player: h.player,
-            results: h.results,
-          }))}
+          history={state.history}
           lang={state.lang as 'en' | 'de'}
           onClose={() => setShowReplayModal(false)}
         />
