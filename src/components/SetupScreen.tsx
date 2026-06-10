@@ -531,7 +531,6 @@ export const SetupScreen: React.FC = () => {
           lang={lang}
           onClose={() => setShowFavoritesModal(false)}
           onListChange={setFavoritesList}
-          onZoom={(url) => { setShowFavoritesModal(false); setZoomUrl(url); }}
         />
       )}
 

@@ -1009,6 +1009,8 @@ body {
 
 .fav-action-btn.search-itunes {
   font-size: 0.85rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  color: var(--text);
 }
 
 /* Loading Spinner Animation */
