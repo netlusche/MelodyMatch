@@ -38,8 +38,8 @@ A fast-paced, interactive, modern **local multiplayer music quiz** built with Re
 - Prevents remastered or compilation dates (e.g. *Don't Stop Believin'* showing 2001 instead of 1981).
 
 ### ❤️ Liked Songs & Player
-- **Save Songs**: Heart any song during a turn or on the results screen to add it to your persistent Liked Songs list (backed by `localStorage`).
-- **Liked Songs Player Modal**: Open the **Player** modal from the setup screen to browse and replay your saved songs. Features:
+- **Save Songs**: Heart any song during a turn or on the results screen to add it to your persistent Liked Songs list (backed by `localStorage`). The list is capped at **20 songs** — a dismissible overlay appears when the limit is reached, with an expandable export section (Download .m3u, Download .csv, Clear List with confirmation).
+- **Liked Songs Player Modal**: Open the **Player** modal from the setup screen to browse and replay your saved songs. Preview URLs are refreshed automatically when the section is expanded (Deezer CDN links expire after ~1–2 hours). Features:
   - 🎡 Spinning vinyl turntable — idle vinyl disc placeholder, album cover fades in smoothly when a song plays.
   - Full song list with play, info, Deezer/iTunes links, and remove button.
   - TrackInfo modal stacks on top without closing the player.

@@ -4,7 +4,8 @@ import { translations } from '../i18n/translations';
 import { Song, PlayedSong } from '../types';
 import { Trophy, RotateCcw, Medal, Heart, Play, Square, Info, Maximize2, X, Expand } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { addFavorite, removeFavorite, getFavorites } from '../utils/favorites';
+import { addFavorite, removeFavorite, getFavorites, clearFavorites } from '../utils/favorites';
+import { LikedSongsFullOverlay } from './LikedSongsFullOverlay';
 import { getThemeConfettiColors } from '../utils/confettiColors';
 import { TrackInfoModal } from './TrackInfoModal';
 import { RoundReplayModal } from './RoundReplayModal';
@@ -23,6 +24,7 @@ export const FinalResultsScreen: React.FC = () => {
   const [playingId, setPlayingId] = useState<number | null>(null);
   const [selectedSongForInfo, setSelectedSongForInfo] = useState<Song | null>(null);
   const [zoomUrl, setZoomUrl] = useState<string | null>(null);
+  const [showFavFull, setShowFavFull] = useState(false);
 
   const handleTogglePlay = (song: Song) => {
     if (!song.previewUrl) return;
@@ -61,8 +63,12 @@ export const FinalResultsScreen: React.FC = () => {
       removeFavorite(song.id);
       setFavIds(favIds.filter(id => id !== song.id));
     } else {
-      addFavorite(song);
-      setFavIds([...favIds, song.id]);
+      const result = addFavorite(song);
+      if (result.full) {
+        setShowFavFull(true);
+      } else if (result.success) {
+        setFavIds([...favIds, song.id]);
+      }
     }
   };
 
@@ -149,7 +155,7 @@ export const FinalResultsScreen: React.FC = () => {
               <span>{state.lang === 'de' ? 'Player' : 'Player'}</span>
             </button>
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '340px', overflowY: 'auto', paddingRight: '4px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '340px', overflowY: 'auto', WebkitOverflowScrolling: 'touch', paddingRight: '4px' }}>
             {state.history.map((playedSong) => {
               // Support legacy localStorage entries that predate the PlayedSong shape
               const entry = playedSong as PlayedSong;
@@ -297,6 +303,15 @@ export const FinalResultsScreen: React.FC = () => {
           <span>{t.playAgain}</span>
         </button>
       </div>
+
+      {showFavFull && (
+        <LikedSongsFullOverlay
+          lang={state.lang}
+          songs={getFavorites()}
+          onClose={() => setShowFavFull(false)}
+          onClear={() => { clearFavorites(); setFavIds([]); }}
+        />
+      )}
 
       {showReplayModal && (
         <RoundReplayModal

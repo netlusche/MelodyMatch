@@ -5,7 +5,6 @@ import { translations } from '../i18n/translations';
 import { audioManager } from '../services/audio';
 import { removeFavorite, getFavorites } from '../utils/favorites';
 import { TrackInfoModal } from './TrackInfoModal';
-import { refreshPreviewUrls } from '../services/api';
 
 interface FavoritesModalProps {
   songs: Song[];
@@ -32,14 +31,7 @@ export const FavoritesModal: React.FC<FavoritesModalProps> = ({
   }, [songs]);
 
   useEffect(() => {
-    let cancelled = false;
-    refreshPreviewUrls(songs).then(refreshed => {
-      if (!cancelled) setList(refreshed);
-    });
-    return () => {
-      cancelled = true;
-      audioManager.pause();
-    };
+    return () => { audioManager.pause(); };
   }, []);
 
   const nowPlaying = list.find(s => s.id === playingId) ?? null;

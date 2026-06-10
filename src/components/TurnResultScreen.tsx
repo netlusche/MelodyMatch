@@ -3,7 +3,8 @@ import { useGame } from '../state/GameContext';
 import { translations } from '../i18n/translations';
 import { CheckCircle, XCircle, ChevronRight, Heart, Play, Square, Info, Maximize2, X, Music } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { addFavorite, removeFavorite, isFavorite } from '../utils/favorites';
+import { addFavorite, removeFavorite, isFavorite, clearFavorites, getFavorites } from '../utils/favorites';
+import { LikedSongsFullOverlay } from './LikedSongsFullOverlay';
 import { getThemeConfettiColors } from '../utils/confettiColors';
 import { audioManager } from '../services/audio';
 import { TrackInfoModal } from './TrackInfoModal';
@@ -20,6 +21,7 @@ export const TurnResultScreen: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [showZoom, setShowZoom] = useState(false);
+  const [showFavFull, setShowFavFull] = useState(false);
 
   // Sync state with HTML5 audio events (play, pause, ended)
   useEffect(() => {
@@ -68,8 +70,12 @@ export const TurnResultScreen: React.FC = () => {
       removeFavorite(state.currentSong.id);
       setIsFav(false);
     } else {
-      addFavorite(state.currentSong);
-      setIsFav(true);
+      const result = addFavorite(state.currentSong);
+      if (result.full) {
+        setShowFavFull(true);
+      } else if (result.success) {
+        setIsFav(true);
+      }
     }
   };
 
@@ -236,6 +242,15 @@ export const TurnResultScreen: React.FC = () => {
           <ChevronRight size={24} className="group-hover-translate" />
         </button>
       </div>
+
+      {showFavFull && (
+        <LikedSongsFullOverlay
+          lang={state.lang}
+          songs={getFavorites()}
+          onClose={() => setShowFavFull(false)}
+          onClear={() => { clearFavorites(); setIsFav(false); }}
+        />
+      )}
 
       {showInfo && state.currentSong && (
         <TrackInfoModal 

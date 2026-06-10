@@ -4,6 +4,7 @@ import { Player, Language, Theme, Song } from '../types';
 import { Users, Settings, Globe, ChevronRight, UserPlus, Trash2, Heart, Play, Square, ChevronDown, ChevronUp, Download, Info, Maximize2, X, Expand } from 'lucide-react';
 import { translations } from '../i18n/translations';
 import { getFavorites, removeFavorite } from '../utils/favorites';
+import { refreshPreviewUrls } from '../services/api';
 import packageInfo from '../../package.json';
 import { TrackInfoModal } from './TrackInfoModal';
 import { PlaylistExportModal } from './PlaylistExportModal';
@@ -23,6 +24,7 @@ export const SetupScreen: React.FC = () => {
   const [showFavorites, setShowFavorites] = useState(false);
   const [showFavoritesModal, setShowFavoritesModal] = useState(false);
   const [favoritesList, setFavoritesList] = useState<Song[]>([]);
+  const [isRefreshingFavorites, setIsRefreshingFavorites] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [selectedSongForInfo, setSelectedSongForInfo] = useState<Song | null>(null);
@@ -33,11 +35,20 @@ export const SetupScreen: React.FC = () => {
 
   const t = translations[lang];
 
-  // Load favorites when screen mounts or when toggled
+  // Load and refresh favorites when section is expanded
   useEffect(() => {
-    if (showFavorites) {
-      setFavoritesList(getFavorites());
-    }
+    if (!showFavorites) return;
+    const raw = getFavorites();
+    setFavoritesList(raw);
+    setIsRefreshingFavorites(true);
+    let cancelled = false;
+    refreshPreviewUrls(raw).then(refreshed => {
+      if (!cancelled) {
+        setFavoritesList(refreshed);
+        setIsRefreshingFavorites(false);
+      }
+    });
+    return () => { cancelled = true; };
   }, [showFavorites]);
 
   useEffect(() => {
@@ -384,6 +395,12 @@ export const SetupScreen: React.FC = () => {
                     >
                       {t.clearFavorites}
                     </button>
+                  </div>
+                )}
+                {isRefreshingFavorites && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem 0.25rem', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
+                    <div className="loading-spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
+                    <span>{lang === 'de' ? 'Songs werden geladen…' : 'Loading songs…'}</span>
                   </div>
                 )}
                 <div className="favorites-list-container">

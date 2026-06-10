@@ -252,9 +252,18 @@ Slugs are constructed deterministically client-side: lowercase, `&` → `and`, p
 
 Liked songs are stored in `localStorage` via `src/utils/favorites.ts` (`addFavorite`, `removeFavorite`, `getFavorites`). They persist across sessions and game resets.
 
+### 20-Song Limit
+
+The Liked Songs list is capped at **20 songs**. `addFavorite()` returns `{ success: boolean; full: boolean }`. When `full: true`, no song is added and the caller is expected to show `<LikedSongsFullOverlay>` — a dismissible overlay triggered from `TurnResultScreen`, `FinalResultsScreen`, and `RoundReplayModal`. The overlay shows the limit message and an expandable "Export list and start over?" section with three inline actions: Download .m3u, Download .csv, and Clear List. Clear List requires a confirmation step (Cancel / Yes, delete list) before wiping `localStorage`. The limit constant `FAVORITES_LIMIT = 20` is exported from `favorites.ts`.
+
 ### Preview URL Refresh
 
-Deezer CDN preview URLs expire after ~1–2 hours. Songs stored in `localStorage` (Liked Songs) or in round history therefore fail to play after some time — most visibly on iOS Safari. Both `FavoritesModal` and `RoundReplayModal` call `refreshPreviewUrls()` on mount to silently re-fetch fresh URLs for all songs in parallel before the user taps anything. See [api.md — Section 3](api.md#3-preview-url-refresh) for details.
+Deezer CDN preview URLs expire after ~1–2 hours. Songs stored in `localStorage` fail to play after some time — most visibly on iOS Safari.
+
+- **SetupScreen**: Preview URLs are refreshed lazily when the Liked Songs section is expanded. A small loading spinner ("Loading songs…") appears during the refresh and disappears when done. The list is initialised from `localStorage` immediately (so the song metadata is shown at once) and swapped for fresh-URL versions in the background.
+- **RoundReplayModal**: Calls `refreshPreviewUrls()` on mount for all songs in round history.
+
+See [api.md — Section 3](api.md#3-preview-url-refresh) for details on the underlying mechanism.
 
 ### FavoritesModal (`src/components/FavoritesModal.tsx`)
 

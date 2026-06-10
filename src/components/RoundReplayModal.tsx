@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { X, Music2, Play, Square, Info, Heart, Disc } from 'lucide-react';
 import { translations } from '../i18n/translations';
 import { audioManager } from '../services/audio';
-import { addFavorite, removeFavorite, getFavorites } from '../utils/favorites';
+import { addFavorite, removeFavorite, getFavorites, clearFavorites } from '../utils/favorites';
 import { TrackInfoModal } from './TrackInfoModal';
+import { LikedSongsFullOverlay } from './LikedSongsFullOverlay';
 import { Song, PlayedSong } from '../types';
 import { refreshPreviewUrls } from '../services/api';
 
@@ -18,6 +19,7 @@ export const RoundReplayModal: React.FC<RoundReplayModalProps> = ({ history, lan
   const [playingId, setPlayingId] = useState<number | null>(null);
   const [favIds, setFavIds] = useState<number[]>([]);
   const [selectedSongForInfo, setSelectedSongForInfo] = useState<Song | null>(null);
+  const [showFavFull, setShowFavFull] = useState(false);
   const [refreshedHistory, setRefreshedHistory] = useState<PlayedSong[]>(history);
 
   useEffect(() => {
@@ -59,8 +61,12 @@ export const RoundReplayModal: React.FC<RoundReplayModalProps> = ({ history, lan
       removeFavorite(song.id);
       setFavIds(ids => ids.filter(id => id !== song.id));
     } else {
-      addFavorite(song);
-      setFavIds(ids => [...ids, song.id]);
+      const result = addFavorite(song);
+      if (result.full) {
+        setShowFavFull(true);
+      } else if (result.success) {
+        setFavIds(ids => [...ids, song.id]);
+      }
     }
   };
 
@@ -252,6 +258,15 @@ export const RoundReplayModal: React.FC<RoundReplayModalProps> = ({ history, lan
           song={selectedSongForInfo}
           lang={lang}
           onClose={() => setSelectedSongForInfo(null)}
+        />
+      )}
+
+      {showFavFull && (
+        <LikedSongsFullOverlay
+          lang={lang}
+          songs={getFavorites()}
+          onClose={() => setShowFavFull(false)}
+          onClear={() => { clearFavorites(); setFavIds([]); }}
         />
       )}
     </>
