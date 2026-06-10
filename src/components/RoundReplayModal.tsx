@@ -5,6 +5,7 @@ import { audioManager } from '../services/audio';
 import { addFavorite, removeFavorite, getFavorites } from '../utils/favorites';
 import { TrackInfoModal } from './TrackInfoModal';
 import { Song, PlayedSong } from '../types';
+import { refreshPreviewUrls } from '../services/api';
 
 interface RoundReplayModalProps {
   history: PlayedSong[];
@@ -17,14 +18,23 @@ export const RoundReplayModal: React.FC<RoundReplayModalProps> = ({ history, lan
   const [playingId, setPlayingId] = useState<number | null>(null);
   const [favIds, setFavIds] = useState<number[]>([]);
   const [selectedSongForInfo, setSelectedSongForInfo] = useState<Song | null>(null);
+  const [refreshedHistory, setRefreshedHistory] = useState<PlayedSong[]>(history);
 
   useEffect(() => {
     setFavIds(getFavorites().map(s => s.id));
-    return () => { audioManager.pause(); };
+    let cancelled = false;
+    refreshPreviewUrls(history.map(h => h.song)).then(refreshedSongs => {
+      if (cancelled) return;
+      setRefreshedHistory(history.map((h, i) => ({ ...h, song: refreshedSongs[i] })));
+    });
+    return () => {
+      cancelled = true;
+      audioManager.pause();
+    };
   }, []);
 
   const nowPlaying = playingId !== null
-    ? history.find(h => h.song.id === playingId)?.song ?? null
+    ? refreshedHistory.find(h => h.song.id === playingId)?.song ?? null
     : null;
 
   const handleTogglePlay = (song: Song) => {
@@ -166,7 +176,7 @@ export const RoundReplayModal: React.FC<RoundReplayModalProps> = ({ history, lan
 
           {/* Song list */}
           <div style={{ overflowY: 'auto', flex: 1, padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {history.map(({ song, player, results }) => {
+            {refreshedHistory.map(({ song, player, results }) => {
               const isFav = favIds.includes(song.id);
               return (
                 <div key={song.id} className="fav-item-row" style={{ alignItems: 'flex-start', padding: '0.5rem' }}>

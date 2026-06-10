@@ -149,7 +149,7 @@ export const FinalResultsScreen: React.FC = () => {
               <span>{state.lang === 'de' ? 'Player' : 'Player'}</span>
             </button>
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '260px', overflowY: 'auto', paddingRight: '4px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '340px', overflowY: 'auto', paddingRight: '4px' }}>
             {state.history.map((playedSong) => {
               // Support legacy localStorage entries that predate the PlayedSong shape
               const entry = playedSong as PlayedSong;

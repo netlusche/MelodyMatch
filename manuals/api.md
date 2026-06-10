@@ -170,7 +170,7 @@ For these five genres, switching to `PLAYLIST_MAP` with editorially curated play
 |---|---|---|
 | Deutschpop | 11242422704, 10226082322, 8668716682 | ✅ Deezer DE |
 | Deutschrock | 1956739222, 6030118144, 10396822102 | ✅ Deezer DE |
-| Deutscher Rap | 10578289242, 14639295721, 1043463931, 146820791, 11533942424 | ✅ Deezer DE |
+| Deutscher Rap | 10578289242, 146820791, 11533942424, 8871685602, 13378558903 | ✅ Deezer DE |
 | Ballermann | 10328601542, 9486947662, 4789726188, 7712049342 | ✅ / ⚠️ mixed |
 | Partyhits | 2097558104, 740966875, 11203091824, 8699026122, 1917690502, 10328601542 | ✅ / ⚠️ mixed |
 
@@ -241,7 +241,19 @@ During the transition from the `PASS_DEVICE` screen to the `QUIZ` screen, the ap
 
 ---
 
-## 3. Song Background & Genius Lookup
+## 3. Preview URL Refresh
+
+Deezer CDN preview URLs contain signed expiry tokens and become invalid after approximately **1–2 hours**. URLs stored in `localStorage` (Liked Songs) or in session state (Round Replay history) will therefore fail to play after some time — most visibly on iOS Safari, which aborts the request immediately rather than silently failing.
+
+**Solution:** `refreshPreviewUrls(songs: Song[]): Promise<Song[]>` in `src/services/api.ts` re-fetches `https://api.deezer.com/track/{id}` for every song in parallel via JSONP and returns updated `Song` objects with fresh `previewUrl` values. Per-song failures are silently ignored (original URL kept as fallback).
+
+This function is called automatically:
+- In `FavoritesModal` on mount — refreshes all Liked Songs before the user taps any cover
+- In `RoundReplayModal` on mount — refreshes all songs from the round
+
+---
+
+## 4. Song Background & Genius Lookup
  
 To provide background information about tracks without introducing heavy API key setups or CORS issues, MelodyMatch uses two client-side integrations:
  

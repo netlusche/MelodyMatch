@@ -252,6 +252,10 @@ Slugs are constructed deterministically client-side: lowercase, `&` → `and`, p
 
 Liked songs are stored in `localStorage` via `src/utils/favorites.ts` (`addFavorite`, `removeFavorite`, `getFavorites`). They persist across sessions and game resets.
 
+### Preview URL Refresh
+
+Deezer CDN preview URLs expire after ~1–2 hours. Songs stored in `localStorage` (Liked Songs) or in round history therefore fail to play after some time — most visibly on iOS Safari. Both `FavoritesModal` and `RoundReplayModal` call `refreshPreviewUrls()` on mount to silently re-fetch fresh URLs for all songs in parallel before the user taps anything. See [api.md — Section 3](api.md#3-preview-url-refresh) for details.
+
 ### FavoritesModal (`src/components/FavoritesModal.tsx`)
 
 Opened via the **Player** button on the Setup screen (visible as soon as ≥1 song is liked). Features:

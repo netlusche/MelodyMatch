@@ -19,7 +19,7 @@ const PLAYLIST_MAP: Record<string, number | number[]> = {
   'ndw': [6758361584, 1230675621, 2734068964, 8937349862, 1106363531, 15022157843, 15344382803], // Neue Deutsche Welle, NDW Hits, Neue Deutsche Welle - NDW, NDW- Neue Deutsche Welle, ULTIMATE 80s NDW, NDW SaMu, 80er NDW
   'deutschpop': [11242422704, 10226082322, 8668716682], // Deutschpop Super Hits, Happy Deutschpop, Deutschpop Hits von heute
   'deutschrock': [1956739222, 6030118144, 10396822102], // Deutschrock Essentials, Deutsch Rock (Rammstein/Knorkator), Deutschland 00er
-  'deutscher rap': [10578289242, 14639295721, 1043463931, 146820791, 11533942424], // Deutschrap Super Hits, Deutsche-Hits, Freitag alles neu, Deutschrap Hits, Deutschrap Essentials
+  'deutscher rap': [10578289242, 146820791, 11533942424, 8871685602, 13378558903], // Deutschrap Super Hits, Deutschrap Hits, Deutschrap Essentials, Deutschrap Klassiker, Deutschrap 2020s
   'ballermann': [10328601542, 9486947662, 4789726188, 7712049342], // Endlich wieder Malle, Après Ski Hits, Ballermann Hits Best Of, Ballermann (Markus Becker)
   'partyhits': [2097558104, 740966875, 11203091824, 8699026122, 1917690502, 10328601542], // Party Hits, Club Party Hits, Dance Hits, Schlager Super Hits, Schlagerparty, Endlich wieder Malle
   'new wave': [8515679522, 8700369282, 3291146382, 10082108122, 4055216422], // New Wave Essentials, Post-Punk Essentials, New Wave classics, New Wave - Dark Gothic post punk, 80s Oldschool Indie. New Wave & Post-Punk Classics
@@ -448,4 +448,24 @@ export const fetchSongs = async (count: number, genres: string[] = ['all']): Pro
     console.error("Failed to fetch songs from Deezer:", error);
     return [];
   }
+};
+
+/**
+ * Refresh preview URLs for a list of songs by re-fetching each track from Deezer.
+ * Deezer CDN preview URLs contain expiry tokens and become invalid after ~1-2 hours.
+ * Failures are silently ignored — the original URL is kept as fallback.
+ */
+export const refreshPreviewUrls = async (songs: Song[]): Promise<Song[]> => {
+  const refreshed = await Promise.all(
+    songs.map(async (song) => {
+      try {
+        const data = await fetchDeezerJsonp(`https://api.deezer.com/track/${song.id}`);
+        if (data?.preview) return { ...song, previewUrl: data.preview };
+      } catch {
+        // Keep original URL on failure
+      }
+      return song;
+    })
+  );
+  return refreshed;
 };
