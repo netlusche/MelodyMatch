@@ -35,9 +35,8 @@ export const SetupScreen: React.FC = () => {
 
   const t = translations[lang];
 
-  // Load and refresh favorites when section is expanded
-  useEffect(() => {
-    if (!showFavorites) return;
+  // Load and refresh favorites when section is expanded or Player modal is opened
+  const runFavoritesRefresh = (onDone?: (songs: Song[]) => void) => {
     const raw = getFavorites();
     setFavoritesList(raw);
     setIsRefreshingFavorites(true);
@@ -46,10 +45,21 @@ export const SetupScreen: React.FC = () => {
       if (!cancelled) {
         setFavoritesList(refreshed);
         setIsRefreshingFavorites(false);
+        onDone?.(refreshed);
       }
     });
     return () => { cancelled = true; };
+  };
+
+  useEffect(() => {
+    if (!showFavorites) return;
+    return runFavoritesRefresh();
   }, [showFavorites]);
+
+  useEffect(() => {
+    if (!showFavoritesModal) return;
+    return runFavoritesRefresh();
+  }, [showFavoritesModal]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

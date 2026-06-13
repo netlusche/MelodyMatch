@@ -1,5 +1,6 @@
 import React from 'react';
 import { GameProvider, useGame } from './state/GameContext';
+import { useWakeLock } from './hooks/useWakeLock';
 import { SetupScreen } from './components/SetupScreen';
 import { PassDeviceScreen } from './components/PassDeviceScreen';
 import { TurnResultScreen } from './components/TurnResultScreen';
@@ -39,6 +40,9 @@ const MainApp: React.FC = () => {
   const t = translations[state.lang as keyof typeof translations] || translations.en;
   const [showGenresOverlay, setShowGenresOverlay] = React.useState(false);
   const [showStartOverConfirm, setShowStartOverConfirm] = React.useState(false);
+
+  const wakeLockActive = ['PASS_DEVICE', 'QUIZ', 'TURN_RESULT'].includes(state.phase);
+  useWakeLock(wakeLockActive);
 
   React.useEffect(() => {
     audioManager.registerUnlockListeners();
