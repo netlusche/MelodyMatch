@@ -248,7 +248,8 @@ Deezer CDN preview URLs contain signed expiry tokens and become invalid after ap
 **Solution:** `refreshPreviewUrls(songs: Song[]): Promise<Song[]>` in `src/services/api.ts` re-fetches `https://api.deezer.com/track/{id}` for every song in parallel via JSONP and returns updated `Song` objects with fresh `previewUrl` values. Per-song failures are silently ignored (original URL kept as fallback).
 
 This function is called automatically:
-- In `FavoritesModal` on mount — refreshes all Liked Songs before the user taps any cover
+- In `SetupScreen` when the Liked Songs section is expanded — refreshes all Liked Songs before the user taps any cover
+- In `SetupScreen` when the Player modal (`FavoritesModal`) is opened directly — ensures URLs are fresh even if the section was never expanded
 - In `RoundReplayModal` on mount — refreshes all songs from the round
 
 ---

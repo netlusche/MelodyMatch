@@ -69,13 +69,16 @@ src/
 │   ├── FavoritesModal.tsx      # Liked Songs player modal
 │   ├── RoundReplayModal.tsx    # Round Replay player modal
 │   ├── TrackInfoModal.tsx      # Wikipedia summary + Genius link modal
-│   └── PlaylistExportModal.tsx # Export liked songs as .m3u / .csv / text
+│   ├── PlaylistExportModal.tsx # Export liked songs as .m3u / .csv / text
+│   └── LikedSongsFullOverlay.tsx # Overlay shown when 20-song limit is reached
+├── hooks/
+│   └── useWakeLock.ts          # Screen Wake Lock hook (prevents screen dimming during game)
 ├── i18n/
 │   └── translations.ts         # EN + DE translation strings
 └── utils/
     ├── arrayUtils.ts            # Fisher-Yates shuffle
     ├── confettiColors.ts        # Per-theme confetti color sets
-    ├── favorites.ts             # localStorage read/write for liked songs
+    ├── favorites.ts             # localStorage read/write for liked songs (incl. clearFavorites)
     └── stringUtils.ts           # cleanAndNormalizeTitle, title variation helpers
 ```
 
@@ -260,7 +263,7 @@ The Liked Songs list is capped at **20 songs**. `addFavorite()` returns `{ succe
 
 Deezer CDN preview URLs expire after ~1–2 hours. Songs stored in `localStorage` fail to play after some time — most visibly on iOS Safari.
 
-- **SetupScreen**: Preview URLs are refreshed lazily when the Liked Songs section is expanded. A small loading spinner ("Loading songs…") appears during the refresh and disappears when done. The list is initialised from `localStorage` immediately (so the song metadata is shown at once) and swapped for fresh-URL versions in the background.
+- **SetupScreen**: Preview URLs are refreshed lazily in two cases: (1) when the Liked Songs section is expanded, and (2) when the Player modal is opened directly. A small loading spinner ("Loading songs…") appears during the refresh. The list is initialised from `localStorage` immediately and swapped for fresh-URL versions in the background.
 - **RoundReplayModal**: Calls `refreshPreviewUrls()` on mount for all songs in round history.
 
 See [api.md — Section 3](api.md#3-preview-url-refresh) for details on the underlying mechanism.
@@ -395,6 +398,21 @@ Three icon files in `public/` (and `dist/` after build), all derived from `og-im
 | Wikipedia / MusicBrainz / iTunes | No cache | Dynamic, already covered by in-memory cache |
 
 The Service Worker is registered with `registerType: 'autoUpdate'` — when a new version is deployed, the SW updates automatically in the background on the next page load.
+
+### Screen Wake Lock
+
+`src/hooks/useWakeLock.ts` — a React hook that prevents the device screen from dimming or locking during active gameplay.
+
+```typescript
+useWakeLock(active: boolean)
+```
+
+- Calls `navigator.wakeLock.request('screen')` when `active` is `true`.
+- Automatically re-requests the lock after the page becomes visible again (the Wake Lock API releases the lock automatically when the tab is backgrounded or the screen turns off).
+- Silently ignores errors when the API is unsupported (older iOS, some Android WebViews).
+- Active during phases: `PASS_DEVICE`, `QUIZ`, `TURN_RESULT`. Released on `SETUP`, `GENRE_SELECTION`, and `FINAL_RESULTS`.
+
+Supported since iOS 16.4 (Safari) and Chrome 84 (Android/Desktop).
 
 ### Installation
 
