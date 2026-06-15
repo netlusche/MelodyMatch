@@ -45,6 +45,9 @@ A fast-paced, interactive, modern **local multiplayer music quiz** built with Re
   - TrackInfo modal stacks on top without closing the player.
 - **Export Playlist**: Export your Liked Songs as `.m3u`, `.csv`, or a copyable text list for import into Spotify, Apple Music, or Deezer via Soundiiz / TuneMyMusic.
 
+### 📊 Live Score Button
+- A **Score** button is always visible at the bottom center of the screen during active gameplay (all phases except Setup and Genre Selection). Tapping it opens a live standings overlay showing all players sorted by score — the currently active player is highlighted with a colored border.
+
 ### 🏆 End Screen & Round Replay
 - **Winner Screen**: Confetti animation, leaderboard, and full played-songs history with per-song points breakdown.
 - **Round Replay Player Modal**: Open the **Player** modal from the winner screen to relisten to all songs from the round. Same spinning turntable, same song info — including who played it and what points were scored.
@@ -62,6 +65,7 @@ A fast-paced, interactive, modern **local multiplayer music quiz** built with Re
 - Full **English** and **German** localization, including region-specific genre configurations and Wikipedia language fallback.
 
 ### 📱 PWA & Installation
+- **Screen stays on**: The app uses the **Wake Lock API** to prevent the screen from dimming or locking during active gameplay (Pass Device, Quiz, and Turn Result screens). The lock is re-acquired automatically if the tab is backgrounded and brought back. Supported on iOS 16.4+ and Android Chrome 84+.
 - **Installable as an app** on iOS and Android — no App Store required.
 - **Offline-capable app shell**: The full UI loads instantly from cache even without a network connection. Music previews and metadata still require internet.
 - **Album art caching**: Deezer album covers are cached locally for 7 days for faster reloads.

@@ -1551,6 +1551,30 @@ body {
   transform: scale(1.05);
 }
 
+/* Score Button (fixed bottom center) */
+.score-btn {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  z-index: 100;
+  transition: all 0.2s ease;
+}
+
+.score-btn:hover {
+  background: var(--card-hover);
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
 /* Selected Genres Link (fixed on the bottom left, symmetrical to start-over-btn) */
 .selected-genres-link {
   position: fixed;
@@ -1648,6 +1672,18 @@ body {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
   }
   
+  .score-btn {
+    bottom: 1.5rem;
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 14px;
+  }
+
+  .score-btn:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+
   .selected-genres-link {
     left: max(1.5rem, calc(50% - 380px));
     bottom: 1.5rem;
@@ -1655,7 +1691,7 @@ body {
     padding: 0.6rem 1.2rem;
     border-radius: 14px;
   }
-  
+
   .selected-genres-link:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);

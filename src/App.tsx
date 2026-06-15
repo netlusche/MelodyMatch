@@ -40,6 +40,7 @@ const MainApp: React.FC = () => {
   const t = translations[state.lang as keyof typeof translations] || translations.en;
   const [showGenresOverlay, setShowGenresOverlay] = React.useState(false);
   const [showStartOverConfirm, setShowStartOverConfirm] = React.useState(false);
+  const [showScoreOverlay, setShowScoreOverlay] = React.useState(false);
 
   const wakeLockActive = ['PASS_DEVICE', 'QUIZ', 'TURN_RESULT'].includes(state.phase);
   useWakeLock(wakeLockActive);
@@ -162,12 +163,66 @@ const MainApp: React.FC = () => {
       )}
 
       {state.phase !== 'SETUP' && state.phase !== 'GENRE_SELECTION' && (
-        <button 
-          onClick={() => setShowGenresOverlay(true)} 
+        <button
+          onClick={() => setShowGenresOverlay(true)}
           className="selected-genres-link"
         >
           {t.selectedGenresBtn}
         </button>
+      )}
+
+      {state.phase !== 'SETUP' && state.phase !== 'GENRE_SELECTION' && (
+        <button
+          onClick={() => setShowScoreOverlay(true)}
+          className="score-btn"
+        >
+          {t.scoreBtn}
+        </button>
+      )}
+
+      {showScoreOverlay && (
+        <div className="modal-overlay" onClick={() => setShowScoreOverlay(false)}>
+          <div style={{
+            background: 'var(--card)',
+            border: '1.5px solid var(--border-hover)',
+            borderRadius: '20px',
+            padding: '1.5rem',
+            maxWidth: '360px',
+            width: '100%',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            animation: 'scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards',
+          }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>{t.currentScore}</h3>
+              <button
+                type="button"
+                onClick={() => setShowScoreOverlay(false)}
+                style={{ background: 'transparent', border: '1px solid var(--border)', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              {[...state.players]
+                .sort((a, b) => b.score - a.score)
+                .map((player, idx) => (
+                  <div key={player.id} style={{
+                    display: 'flex', alignItems: 'center', gap: '0.75rem',
+                    padding: '0.6rem 0.9rem',
+                    background: 'var(--row-bg)',
+                    borderRadius: '10px',
+                    border: player.id === state.players[state.currentPlayerIndex]?.id ? '1px solid var(--primary)' : '1px solid transparent',
+                  }}>
+                    <span style={{ fontWeight: 700, fontSize: '0.85rem', color: idx === 0 ? 'var(--gold, #f59e0b)' : 'var(--text-muted)', minWidth: 16 }}>
+                      {idx + 1}
+                    </span>
+                    <span style={{ flex: 1, fontWeight: 600, fontSize: '0.95rem' }}>{player.name}</span>
+                    <span style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--primary)' }}>{player.score}</span>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </div>
       )}
 
       {showGenresOverlay && (

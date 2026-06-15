@@ -305,6 +305,18 @@ Both player modals render `TrackInfoModal` internally when a song's info icon is
 
 `QuizScreen` renders a multiple-choice grid with 4 options. In TITLE and ARTIST steps, answer text is blurred until the player actively reveals them (to prevent accidental spoilers when passing the device). In YEAR step, answers are never blurred.
 
+### Fixed Bottom Navigation
+
+Three persistent buttons are fixed to the bottom of the screen during active gameplay (all phases except `SETUP` and `GENRE_SELECTION`), implemented directly in `App.tsx`:
+
+| Button | Position | Action |
+|---|---|---|
+| **Selected Genres** | Bottom left | Opens genre/decade chip overlay |
+| **Score** | Bottom center | Opens live standings overlay — players sorted by score, active player highlighted |
+| **Start over** | Bottom right | Opens restart confirmation dialog |
+
+The Score overlay sorts `state.players` by score descending on each render. The active player (`state.players[state.currentPlayerIndex]`) is highlighted with a `var(--primary)` border.
+
 ### Double-Tap Protection
 
 State transition buttons (Begin Turn, Submit Answer) use a local `isTransitioning` boolean set to `true` on first click. Subsequent clicks within the same render cycle are ignored, preventing double-dispatch on rapid taps.
