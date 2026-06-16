@@ -24,19 +24,19 @@ When the user configures the game and clicks "Start Game", the required song poo
 | Genre | Deezer Genre ID | Notes |
 |---|---|---|
 | `hip-hop` | 116 | Hip-Hop charts are consistently genre-pure on Deezer |
-| `heavy metal` | 464 | Metal charts rarely contain unrelated content |
 
-**Why only two genres remain in GENRE_MAP:**
+**Why only one genre remains in GENRE_MAP:**
 
-Deezer's genre charts reflect real-time streaming popularity within a broadly defined genre bucket. The categorization is driven by what labels submit to Deezer's catalog system — not by musical criteria. In practice this causes significant **genre pollution** for several genres:
+Deezer's genre charts reflect real-time streaming popularity within a broadly defined genre bucket. The categorization is driven by what labels submit to Deezer's catalog system — not by musical criteria. In practice this causes significant **genre pollution** or **artist over-concentration** for several genres:
 
 - **Rock (152)**: Schlager and crossover pop tracks frequently appear in Deezer's Rock chart because labels file certain acts under "Rock" for chart purposes.
 - **Pop (132)**: The chart is heavily skewed toward whatever is currently trending globally, with no historical depth — a pure top-40 feed rather than a representative Pop pool.
 - **Electronic (106)**: Deezer's "Electro" bucket is very broad, mixing mainstream EDM, pop-EDM crossovers, and ambient in unpredictable proportions.
 - **R&B (165)**: R&B/Soul/Pop crossover is common at the chart level; the pool lacks variety across eras.
 - **Alternative (85)**: Deezer uses "Alternative" as a catch-all for anything that doesn't fit a primary genre — making it one of the least genre-coherent chart buckets.
+- **Heavy Metal (464)**: Genre-pure, but heavily skewed toward a handful of currently-trending acts — a 300-track chart sample showed Electric Callboy, Bad Omens, and Rammstein alone accounting for ~23% of all tracks. Migrated to `PLAYLIST_MAP` for better artist balance (see Section 1 reference table).
 
-For these five genres, switching to `PLAYLIST_MAP` with editorially curated playlists gives full control over song pool composition, historical coverage, and genre purity. Hip-Hop and Heavy Metal were assessed as low-risk (their Deezer charts are relatively sortenrein) and kept in `GENRE_MAP` for simplicity.
+For these six genres, switching to `PLAYLIST_MAP` with editorially curated playlists gives full control over song pool composition, historical coverage, genre purity, and artist balance. Hip-Hop was assessed as low-risk (its Deezer chart is relatively sortenrein and well-balanced) and kept in `GENRE_MAP` for simplicity.
 
 ### PLAYLIST_MAP
 
@@ -52,7 +52,7 @@ For these five genres, switching to `PLAYLIST_MAP` with editorially curated play
 > 
 > **Est. unique songs** assumes ~50% overlap between playlists within the same genre. Actual pool size depends on track availability at runtime.
 
-#### 🎸 Rock (~500 unique songs, 11 playlists)
+#### 🎸 Rock (~600 unique songs, 13 playlists)
 | ID | Title | Tracks | Type |
 |---|---|---|---|
 | 11242423484 | Rock Super Hits | ~100 | ✅ Deezer DE Editor |
@@ -66,6 +66,10 @@ For these five genres, switching to `PLAYLIST_MAP` with editorially curated play
 | 11335739484 | Modern Rock Essentials | ~100 | ✅ Deezer Rock Editor |
 | 761604441 | Hard Rock Essentials | ~50 | ✅ Deezer Rock Editor |
 | 11801167321 | Rock Classics 60s–80s | ~300 | ⚠️ Community |
+| 14512114763 | 2025 Rock | ~100 | ✅ Deezer Rock Editor |
+| 2865616602 | Women of Rock | ~70 | ✅ Deezer Rock Editor |
+
+> **Note on 2865616602 (Women of Rock):** Added to close a coverage gap for modern female-fronted hard rock acts (e.g. The Warning, Halestorm, Nova Twins, Laura Cox, YONAKA) that were underrepresented across the other Rock playlists.
 
 #### 🎤 Pop (~500 unique songs, 10 playlists)
 | ID | Title | Tracks | Type |
@@ -107,7 +111,7 @@ For these five genres, switching to `PLAYLIST_MAP` with editorially curated play
 | 8869955482 | Slow Jam Essentials | ~51 | ✅ Deezer R&B Editor |
 | 3166040342 | RnB Classics | ~205 | ⚠️ Community |
 
-#### 🌀 Alternative (~400 unique songs, 9 playlists)
+#### 🌀 Alternative (~1100 unique songs, 11 playlists)
 | ID | Title | Tracks | Type |
 |---|---|---|---|
 | 668126235 | Alternative Essentials | ~50 | ✅ Deezer Alternative Editor |
@@ -119,6 +123,26 @@ For these five genres, switching to `PLAYLIST_MAP` with editorially curated play
 | 8971696142 | Synth Pop Essentials | ~50 | ✅ Deezer Alternative Editor |
 | 1306978785 | Hot New Rock | ~170 | ✅ Deezer Rock Editor |
 | 127260811 | Alternative Attack | ~523 | ⚠️ Community |
+| 13200273483 | 2024 Alternative | ~120 | ✅ Deezer Alternative Editor |
+| 14401046561 | 2025 Alternative | ~120 | ✅ Deezer Alternative Editor |
+
+#### 🤘 Heavy Metal (~713 unique songs, 10 playlists)
+| ID | Title | Tracks | Type |
+|---|---|---|---|
+| 2655390504 | Metal Essentials | ~100 | ✅ Deezer Metal Editor |
+| 2004964442 | 2000s Metal | ~50 | ✅ Deezer Metal Editor |
+| 1045800791 | 2010s Metal | ~50 | ✅ Deezer Metal Editor |
+| 13693525421 | 2020s Metal | ~98 | ✅ Deezer Metal Editor |
+| 13238303063 | 2024 Metal | ~100 | ✅ Deezer Metal Editor |
+| 14512132543 | 2025 Metal | ~100 | ✅ Deezer Metal Editor |
+| 1376669717 | Metalcore | ~150 | ✅ Deezer Metal Editor |
+| 1367442165 | Nu Metal Essentials | ~50 | ✅ Deezer Metal Editor |
+| 1294679255 | 80s Metal | ~50 | ✅ Deezer Metal Editor |
+| 1471284255 | 90s Metal | ~50 | ✅ Deezer Metal Editor |
+
+> **Migrated from GENRE_MAP (live chart) on 2026-06-11:** The live Metal chart (genre ID 464) was heavily concentrated on a handful of trending acts (Electric Callboy, Bad Omens, Rammstein ≈ 23% of a 300-track sample). This curated combination reduces max artist share to ~1.4% while preserving strong coverage of modern acts (Sleep Token, Bad Omens, BABYMETAL, Knocked Loose, Jinjer, Deftones).
+>
+> **80s/90s additions:** Added specifically to boost NWOBHM/classic metal coverage (Iron Maiden, Judas Priest, Saxon, Motörhead, Dio, Megadeth, Anthrax) and 90s metal/groove metal (Pantera, Sepultura, Fear Factory, Type O Negative, Korn). Scorpions are intentionally not force-fitted here — Deezer classifies them under Hard Rock, and they already appear in the Rock pool (see above).
 
 #### 🎵 Indie (~200 unique songs, 4 playlists)
 | ID | Title | Tracks | Type |
@@ -144,6 +168,52 @@ For these five genres, switching to `PLAYLIST_MAP` with editorially curated play
 | 3291146382 | New Wave Classics | ~varies | ✅ Deezer |
 | 10082108122 | New Wave – Dark Gothic Post-Punk | ~varies | ✅ Deezer |
 | 4055216422 | 80s Oldschool Indie / New Wave | ~varies | ✅ Deezer |
+
+#### 🦇 Goth (~465 unique songs, 5 playlists)
+| ID | Title | Tracks | Type |
+|---|---|---|---|
+| 7615314822 | Essential Goth & Post-Punk | 75 | ⚠️ Community |
+| 12920343183 | Gothic rock/Darkwave/Post-punk | 162 | ⚠️ Community |
+| 1511408641 | Gothic Rock Top Tracks | 60 | ⚠️ Community |
+| 13593501061 | Goth Essentials: Baby Bat Edition | 60 | ⚠️ Community |
+| 6727724224 | Gothic Rock Playlist (Dark Wave/Post-Punk/Deathrock) | 197 | ⚠️ Community |
+
+> **Note:** No official Deezer editorial playlists exist for Goth — all five are curated community playlists, hand-vetted for genre purity (sample-checked track lists) and strong coverage of core acts: The Cure, Joy Division, Siouxsie and The Banshees, Bauhaus, The Sisters of Mercy, Killing Joke, Christian Death.
+
+#### 🎤 K-Pop (~347 unique songs, 6 playlists)
+| ID | Title | Tracks | Type |
+|---|---|---|---|
+| 873660353 | K-Pop Essentials | ~80 | ✅ Deezer K-Pop Editor |
+| 4096400722 | Top K-Pop | ~50 | ✅ Deezer K-Pop Editor |
+| 12244134951 | Fresh K-Pop | ~70 | ✅ Deezer K-Pop Editor |
+| 10738561582 | K-Pop 2nd Generation | ~70 | ✅ Deezer K-Pop Editor |
+| 11012274682 | K-Pop 3rd Generation | ~70 | ✅ Deezer K-Pop Editor |
+| 7483261404 | Women of K-Pop | ~51 | ✅ Deezer K-Pop Editor |
+
+> **Note:** Deezer maintains a dedicated K-Pop Editor with full generational coverage. This combination spans 1st through 5th generation acts (BoA, S.E.S., Wonder Girls → BIGBANG, SHINee, TVXQ → BTS, BLACKPINK, TWICE, MAMAMOO → LE SSERAFIM, NewJeans, aespa → BABYMONSTER, RIIZE, CORTIS).
+
+#### 🧐 Für Kenner / For Connoisseurs (~940 unique songs, 17 playlists)
+| ID | Title | Tracks | Focus |
+|---|---|---|---|
+| 7875469222 | Classic Rock Deep Cuts | ~96 | Rolling Stones, Beatles, Led Zeppelin, Pink Floyd, Black Sabbath, Hendrix |
+| 7981359362 | Hidden Gems of Rock | ~28 | Def Leppard, Rush, Journey, Toto, Springsteen |
+| 7875539102 | Metal Deep Cuts | ~98 | TOOL, Slayer, Meshuggah, Anthrax, Cradle of Filth |
+| 7875467342 | Classic Hip-Hop Deep Cuts | ~98 | JAY-Z, Nas, Outkast, Kanye, Wu-Tang, 2Pac, Dr. Dre |
+| 7875544882 | New Wave Deep Cuts | ~98 | Duran Duran, Billy Idol, DEVO, Soft Cell, The Cars, ABC |
+| 14663194001 | The Cure: Deep Cuts | ~33 | The Cure |
+| 10751473082 | Depeche Mode Deep Cuts | ~64 | Depeche Mode |
+| 12754566241 | Post-Punk Deep Cuts | ~98 | Joy Division, New Order, Siouxsie, Gang of Four, Echo & the Bunnymen, Talking Heads |
+| 14482486843 | The Smiths singles and b-sides | ~48 | The Smiths |
+| 12754554161 | New Order: Deep Cuts | ~20 | New Order |
+| 12754478601 | David Bowie: Deep Cuts | ~25 | David Bowie |
+| 12754594941 | U2: Deep Cuts | ~26 | U2 |
+| 12754576441 | R.E.M.: Deep Cuts | ~30 | R.E.M. |
+| 164030071 | Queen Deep Cuts I | ~15 | Queen |
+| 8702537662 | Ultimate Prince Deep Cuts | ~83 | Prince |
+| 11054623262 | Elton John: Deep Cuts | ~28 | Elton John |
+| 15339520123 | Madonna: Deep Cuts | ~55 | Madonna |
+
+> **Concept:** Unlike other genres, "Für Kenner" is not a musical style but a curation concept — deep cuts and lesser-known album tracks from extremely famous artists across Rock, Metal, Hip-Hop, New Wave, and Post-Punk. The goal is recognition of the artist paired with surprise at the unfamiliar song, distinct from the obvious singles/hits most players already know. All playlists were sample-checked for genuine "deep cut" quality (no major singles mixed in) except The Smiths' singles/b-sides compilation, which includes a few well-known tracks alongside genuine rarities. Fleetwood Mac was considered but no clean deep-cuts-only source was found on Deezer, so it was deliberately left out rather than diluting the concept with a single/deep-cut mix.
 
 #### 🇩🇪 NDW (~200 unique songs, 7 playlists)
 | ID | Title | Tracks | Type |

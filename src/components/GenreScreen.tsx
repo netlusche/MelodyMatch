@@ -22,6 +22,8 @@ export const GenreScreen: React.FC = () => {
     { id: 'rock', label: 'Rock' },
     { id: 'indie', label: 'Indie' },
     { id: 'new wave', label: 'New Wave / Post-Punk' },
+    { id: 'goth', label: 'Goth' },
+    { id: 'k-pop', label: 'K-Pop' },
     { id: 'hip-hop', label: 'Hip-Hop' },
     { id: 'electronic', label: 'Electronic' },
     { id: 'r&b', label: 'R&B' },
@@ -37,7 +39,8 @@ export const GenreScreen: React.FC = () => {
     { id: 'deutschrock', translationKey: 'genre_deutschrock' },
     { id: 'deutscher rap', translationKey: 'genre_deutscher_rap' },
     { id: 'ballermann', translationKey: 'genre_ballermann' },
-    { id: 'partyhits', translationKey: 'genre_partyhits' }
+    { id: 'partyhits', translationKey: 'genre_partyhits' },
+    { id: 'für kenner', translationKey: 'genre_fuer_kenner' }
   ];
 
   const availableDecades = DECADE_GENRES.map(d => ({
@@ -117,9 +120,9 @@ export const GenreScreen: React.FC = () => {
         </h2>
         <div className="options-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '0.5rem' }}>
           {availableGenres.map(g => (
-            <button 
+            <button
               key={g.id}
-              className={`option-button ${selectedGenres.includes(g.id) ? 'active' : 'outline'}`}
+              className={`option-button ${selectedGenres.includes(g.id) ? 'active' : 'outline'} ${g.id === 'für kenner' ? 'genre-kenner' : ''}`}
               style={{ padding: '0.5rem', minHeight: '44px', fontSize: '0.9rem' }}
               onClick={() => handleGenreToggle(g.id)}
             >

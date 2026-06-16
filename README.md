@@ -15,13 +15,15 @@ A fast-paced, interactive, modern **local multiplayer music quiz** built with Re
 - **Safari Autoplay Unlock**: Synchronously anchors the audio play promise to the user gesture (e.g., clicking "Begin Turn"), ensuring previews play instantly on iOS Safari. A dedicated error-type check (`NotAllowedError` vs. resource errors) prevents permanent audio lockout when preview URLs are broken or unavailable.
 
 ### 🗂️ Song Pool & Genre System
-- **Curated Playlists for all Genres**: Every genre and decade pulls from multiple hand-picked editorial playlists via `PLAYLIST_MAP` rather than relying on Deezer's genre charts (which can mix in unrelated content). Genre coverage:
-  - 🎸 **Rock** — 11 playlists, ~500 unique songs
+- **Curated Playlists for almost all Genres**: Every genre and decade pulls from multiple hand-picked editorial playlists via `PLAYLIST_MAP` rather than relying on Deezer's genre charts (which can mix in unrelated content or over-concentrate on a handful of trending acts). Hip-Hop is the one exception still using a live chart, since Deezer's Hip-Hop chart is reliably genre-pure and well-balanced. Genre coverage:
+  - 🎸 **Rock** — 13 playlists, ~600 unique songs
   - 🎤 **Pop** — 10 playlists, ~500 unique songs
   - 🎛️ **Electronic** — 8 playlists, ~300 unique songs
   - 🎷 **R&B** — 10 playlists, ~300 unique songs
-  - 🌀 **Alternative** — 9 playlists, ~300 unique songs
-  - 🎸 **Classic Rock**, **Indie**, **New Wave / Post-Punk** — curated playlists
+  - 🌀 **Alternative** — 11 playlists, ~1100 unique songs
+  - 🤘 **Heavy Metal** — 10 playlists, ~713 unique songs
+  - 🎸 **Classic Rock**, **Indie**, **New Wave / Post-Punk**, **Goth**, **K-Pop** — curated playlists
+  - 🧐 **Für Kenner / For Connoisseurs** — 17 playlists, ~940 unique songs. A curation concept rather than a musical style: deep cuts and lesser-known album tracks from massively famous artists (Beatles, Led Zeppelin, Bowie, Queen, Prince, U2, R.E.M., The Cure, Depeche Mode, Madonna, and more) across Rock, Metal, Hip-Hop, New Wave, and Post-Punk — for players who know the artist but not necessarily every song.
   - 🇩🇪 **NDW**, **Schlager**, **Deutschpop**, **Deutschrock**, **Deutscher Rap**, **Ballermann**, **Partyhits** — curated German playlists
   - 📅 **Decades** (50s → 2000+) — curated decade playlists
   - 📊 **Charts** — Deezer global top hits (live chart, intentionally uncurated)

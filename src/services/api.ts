@@ -4,15 +4,15 @@ import { shuffleArray } from '../utils/arrayUtils';
 
 const GENRE_MAP: Record<string, number> = {
   'hip-hop': 116,
-  'heavy metal': 464,
 };
 
 const PLAYLIST_MAP: Record<string, number | number[]> = {
-  'rock': [11242423484, 752286631, 3126664682, 1419215845, 1057779131, 8621268482, 1728093421, 13693489781, 11335739484, 761604441, 11801167321], // Rock Super Hits, Rock Hits, Rock Road Trip, 2000s Rock, 2010s Rock, 80s Rock, 90s Rock, 2020s Rock, Modern Rock Essentials, Hard Rock Essentials, Rock Classics 60s-80s
+  'rock': [11242423484, 752286631, 3126664682, 1419215845, 1057779131, 8621268482, 1728093421, 13693489781, 11335739484, 761604441, 11801167321, 14512114763, 2865616602], // Rock Super Hits, Rock Hits, Rock Road Trip, 2000s Rock, 2010s Rock, 80s Rock, 90s Rock, 2020s Rock, Modern Rock Essentials, Hard Rock Essentials, Rock Classics 60s-80s, 2025 Rock, Women of Rock
   'pop': [1036183001, 8326097522, 8282573142, 1479458365, 2228601362, 1282483245, 4888783264, 1977689462, 5311155022, 5339620562], // Pop Essentials, 00s Pop, 10s Pop, Happy Hits, Fresh Pop, Pop All Stars, Pop Rewind, 00s Party Hits, Top Hits 2012, Top Hits 2010
   'electronic': [3801761042, 1902101402, 4613753548, 6237312204, 13577379741, 10578670022, 8962764402, 14787069183], // Electronic Essentials, Electronic Hits, Dance Essentials, Dance Party Classics, House Party Classics, Techno Essentials, Trip-Hop Essentials, 90er Electronic Essentials
   'r&b': [1314725125, 1999466402, 2021626162, 3196481502, 4160013622, 5411628342, 1699545511, 5014738124, 8869955482, 3166040342], // R&B Essentials, R&B Hits, 2000s R&B, Chill R&B, Women of R&B, 2010s R&B, R&B Rewind, 90s R&B, Slow Jam Essentials, RnB Classics
-  'alternative': [668126235, 5337198442, 7966514882, 1126774471, 1402845615, 760160361, 8971696142, 1306978785, 127260811], // Alternative Essentials, 90s Alternative, alt 50, Alt Pop, New Alternative, Indie Rock Now, Synth Pop Essentials, Hot New Rock, Alternative Attack
+  'alternative': [668126235, 5337198442, 7966514882, 1126774471, 1402845615, 760160361, 8971696142, 1306978785, 127260811, 13200273483, 14401046561], // Alternative Essentials, 90s Alternative, alt 50, Alt Pop, New Alternative, Indie Rock Now, Synth Pop Essentials, Hot New Rock, Alternative Attack, 2024 Alternative, 2025 Alternative
+  'heavy metal': [2655390504, 2004964442, 1045800791, 13693525421, 13238303063, 14512132543, 1376669717, 1367442165, 1294679255, 1471284255], // Metal Essentials, 2000s Metal, 2010s Metal, 2020s Metal, 2024 Metal, 2025 Metal, Metalcore, Nu Metal Essentials, 80s Metal, 90s Metal
   'indie': [9372936102, 754725481, 8716319082, 10452440062], // The Indie Café, crush <3, Indie Rock Essentials, Indie rock essentials
   'classic rock': [6046721604, 14233924321, 1306931615, 1405240385], // Rock Klassiker, Classic Rock Greatest Hits 1, Rock Essentials, 70s Rock
   'schlager': [8699026122, 2813303064, 1917690502, 11354266504, 12462638963], // Schlager Super Hits, Karneval Schlager Party, Schlagerparty, Schlager Sommer, Schlager Queens
@@ -23,7 +23,10 @@ const PLAYLIST_MAP: Record<string, number | number[]> = {
   'ballermann': [10328601542, 9486947662, 4789726188, 7712049342], // Endlich wieder Malle, Après Ski Hits, Ballermann Hits Best Of, Ballermann (Markus Becker)
   'partyhits': [2097558104, 740966875, 11203091824, 8699026122, 1917690502, 10328601542], // Party Hits, Club Party Hits, Dance Hits, Schlager Super Hits, Schlagerparty, Endlich wieder Malle
   'new wave': [8515679522, 8700369282, 3291146382, 10082108122, 4055216422], // New Wave Essentials, Post-Punk Essentials, New Wave classics, New Wave - Dark Gothic post punk, 80s Oldschool Indie. New Wave & Post-Punk Classics
-  
+  'goth': [7615314822, 12920343183, 1511408641, 13593501061, 6727724224], // Essential Goth & Post-Punk, Gothic rock/Darkwave/Post-punk, Gothic Rock Top Tracks, Goth Essentials: Baby Bat Edition, Gothic Rock Playlist (Dark Wave/Post-punk/Deathrock)
+  'k-pop': [873660353, 4096400722, 12244134951, 10738561582, 11012274682, 7483261404], // K-Pop Essentials, Top K-Pop, Fresh K-Pop, K-Pop 2nd Generation, K-Pop 3rd Generation, Women of K-Pop
+  'für kenner': [7875469222, 7981359362, 7875539102, 7875467342, 7875544882, 14663194001, 10751473082, 12754566241, 14482486843, 12754554161, 12754478601, 12754594941, 12754576441, 164030071, 8702537662, 11054623262, 15339520123], // Classic Rock/Metal/Hip-Hop/New Wave Deep Cuts, Hidden Gems of Rock, Post-Punk Deep Cuts, The Cure/Depeche Mode/Smiths/New Order/Bowie/U2/R.E.M./Queen/Prince/Elton John/Madonna Deep Cuts
+
   // Decades
   '50s': [735402575, 4020144442, 11031329462, 3954210902, 9010212882, 5958115324], // 50s Rock 'n' Roll, Billboard 50s, Rock 'n' Roll classics, 50er/60er, 50's Blues, 50's Jazz
   '60s': [620264073, 1437011185, 8962730322, 14597757781, 8181759022, 3566625202, 11031329462], // 60s Hits, 60s Rock, 60s Pop, 60s Ballads, Billboard 60s, 60er, Rock 'n' Roll classics

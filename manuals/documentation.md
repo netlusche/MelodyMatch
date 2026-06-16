@@ -200,8 +200,8 @@ See **[api.md — Section 1](api.md#1-initial-song-pool-fetch)** for the full re
 
 **Summary:**
 
-- `GENRE_MAP`: Maps a genre key to a Deezer genre ID → queries the live chart endpoint. Only used for `hip-hop` and `heavy metal` where chart quality is reliable.
-- `PLAYLIST_MAP`: Maps a genre/decade key to one or more Deezer editorial playlist IDs. Fetched in parallel via `Promise.all`. Used for Rock, Pop, Electronic, R&B, Alternative, and all German genres and decades.
+- `GENRE_MAP`: Maps a genre key to a Deezer genre ID → queries the live chart endpoint. Only used for `hip-hop` where chart quality is reliable and balanced.
+- `PLAYLIST_MAP`: Maps a genre/decade key to one or more Deezer editorial playlist IDs. Fetched in parallel via `Promise.all`. Used for Rock, Pop, Electronic, R&B, Alternative, Heavy Metal, Goth, and all German genres and decades. Heavy Metal was migrated here from `GENRE_MAP` to fix artist over-concentration in the live chart (see [api.md](api.md#genre_map)).
 - Pool size: `Math.max(100, players × rounds + 10)`. If the deduplicated result is smaller, the global top chart fills the gap.
 
 ---

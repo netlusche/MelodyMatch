@@ -82,6 +82,8 @@ const MainApp: React.FC = () => {
       'rock': 'Rock',
       'indie': 'Indie',
       'new wave': 'New Wave / Post-Punk',
+      'goth': 'Goth',
+      'k-pop': 'K-Pop',
       'hip-hop': 'Hip-Hop',
       'electronic': 'Electronic',
       'r&b': 'R&B',
@@ -100,6 +102,7 @@ const MainApp: React.FC = () => {
       'deutscher rap': t.genre_deutscher_rap,
       'ballermann': t.genre_ballermann,
       'partyhits': t.genre_partyhits,
+      'für kenner': t.genre_fuer_kenner,
     };
     return deMap[id] || id;
   };

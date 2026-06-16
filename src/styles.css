@@ -285,6 +285,29 @@ body {
   min-height: 56px;
 }
 
+/* "Für Kenner" genre tile — stands out via theme-aware gradient border + glow */
+.option-button.genre-kenner {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(135deg, var(--primary), var(--secondary)) border-box;
+  color: var(--primary);
+  font-weight: 800;
+  box-shadow: 0 0 10px var(--glow-primary);
+}
+
+.option-button.genre-kenner:hover {
+  box-shadow: 0 0 18px var(--glow-primary);
+  filter: brightness(1.08);
+}
+
+.option-button.genre-kenner.active {
+  background: linear-gradient(135deg, var(--primary), var(--secondary)) border-box;
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 0 22px var(--glow-primary);
+}
+
 .icon-button {
   background: var(--card);
   border: 1px solid var(--border);
