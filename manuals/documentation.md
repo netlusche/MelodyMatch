@@ -263,7 +263,9 @@ The Liked Songs list is capped at **20 songs**. `addFavorite()` returns `{ succe
 
 Deezer CDN preview URLs expire after ~1–2 hours. Songs stored in `localStorage` fail to play after some time — most visibly on iOS Safari.
 
-- **SetupScreen**: Preview URLs are refreshed lazily in two cases: (1) when the Liked Songs section is expanded, and (2) when the Player modal is opened directly. A small loading spinner ("Loading songs…") appears during the refresh. The list is initialised from `localStorage` immediately and swapped for fresh-URL versions in the background.
+- **App.tsx (QUIZ phase)**: If `playSong` fails with a resource/network error (not an autoplay policy block), the URL is refreshed on-demand via `refreshPreviewUrls` and playback is retried immediately. This handles expired CDN URLs mid-game without causing double-play on normal turns.
+- **SetupScreen (Liked Songs list)**: Preview URLs are refreshed eagerly when the section is expanded or the Player modal is opened. A loading spinner appears during refresh. If a URL still fails at play time, the same on-demand fallback retry applies.
+- **FinalResultsScreen (Played Songs list)**: Same on-demand fallback retry as App.tsx — if a play button tap fails due to an expired URL, the URL is refreshed and playback retried automatically.
 - **RoundReplayModal**: Calls `refreshPreviewUrls()` on mount for all songs in round history.
 
 See [api.md — Section 3](api.md#3-preview-url-refresh) for details on the underlying mechanism.

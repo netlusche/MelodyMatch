@@ -32,8 +32,8 @@ const PLAYLIST_MAP: Record<string, number | number[]> = {
   '60s': [620264073, 1437011185, 8962730322, 14597757781, 8181759022, 3566625202, 11031329462], // 60s Hits, 60s Rock, 60s Pop, 60s Ballads, Billboard 60s, 60er, Rock 'n' Roll classics
   '70s': [1470022445, 8877326262, 5605928862, 57280214, 1319793647, 7130870324], // 70s Hits, 70s Happy Hits, 70er Jahre, 1970s, 70s Hits Top 100, 70s Greatest Hits
   '80s': [867825522, 1913763402, 11384036324, 6208592984, 8512471762, 8873745702, 8403360702], // 80s Hits, 80s Party Hits, 80's Essentials, 1980s, 80s Pop, 80s Happy Hits, 80s Ballads
-  '90s': [878989033, 3829647662, 7852252022, 8873744282, 8403350722, 969361861], // 90s Hits, 90er Party Hits, Back to the 90 & 2000er, 90s Happy Hits, 90s Ballads, Année 1990 & 2000
-  '2000+': [248297032, 715215865, 14917741483, 9100953002, 14285831341, 12272270431, 11308515444], // 00s Hits, 10s Party Hits, 10s Hits, 10s Ballads, 2000s-2010s Party, 20s Hits, Pop & Rock Hits
+  '90s': [878989033, 3829647662, 8873744282, 8403350722, 2322259622, 8311123682, 8027597282, 1283602355], // 90s Hits, 90er Party Hits, 90s Happy Hits, 90s Ballads, 90s Party Hits, 90s Pop, 90s Pop Rock, Zeitreise 90er
+  '2000+': [248297032, 1977689462, 8777319042, 8951600962, 715215865, 14917741483, 9100953002, 8074581462, 13650084141], // 00s Hits, 00s Party Hits, 00s Ballads, 00s Acoustic Hits, 10s Party Hits, 10s Hits, 10s Ballads, 2010s Pop Rock, 20s Hits
 };
 
 const SEARCH_TERMS = ['pop music', 'rock music', 'party hits', '90s hits', '2000s hits', 'dance music', 'chart hits'];

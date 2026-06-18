@@ -10,6 +10,7 @@ import { getThemeConfettiColors } from '../utils/confettiColors';
 import { TrackInfoModal } from './TrackInfoModal';
 import { RoundReplayModal } from './RoundReplayModal';
 import { audioManager } from '../services/audio';
+import { refreshPreviewUrls } from '../services/api';
 
 export const FinalResultsScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -40,7 +41,19 @@ export const FinalResultsScreen: React.FC = () => {
             audio.onended = () => setPlayingId(null);
           }
         })
-        .catch(e => {
+        .catch(async (e) => {
+          if (e.name !== 'NotAllowedError') {
+            try {
+              const refreshed = await refreshPreviewUrls([song]);
+              const freshUrl = refreshed[0]?.previewUrl;
+              if (freshUrl) {
+                await audioManager.playSong(freshUrl, false);
+                const audio = audioManager.getAudio();
+                if (audio) audio.onended = () => setPlayingId(null);
+                return;
+              }
+            } catch {}
+          }
           console.warn("Preview playback failed", e);
           setPlayingId(null);
         });

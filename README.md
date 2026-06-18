@@ -25,7 +25,7 @@ A fast-paced, interactive, modern **local multiplayer music quiz** built with Re
   - 🎸 **Classic Rock**, **Indie**, **New Wave / Post-Punk**, **Goth**, **K-Pop** — curated playlists
   - 🧐 **Für Kenner / For Connoisseurs** — 17 playlists, ~940 unique songs. A curation concept rather than a musical style: deep cuts and lesser-known album tracks from massively famous artists (Beatles, Led Zeppelin, Bowie, Queen, Prince, U2, R.E.M., The Cure, Depeche Mode, Madonna, and more) across Rock, Metal, Hip-Hop, New Wave, and Post-Punk — for players who know the artist but not necessarily every song.
   - 🇩🇪 **NDW**, **Schlager**, **Deutschpop**, **Deutschrock**, **Deutscher Rap**, **Ballermann**, **Partyhits** — curated German playlists
-  - 📅 **Decades** (50s → 2000+) — curated decade playlists
+  - 📅 **Decades** (50s → 2000+) — curated decade playlists, all using official Deezer editorial playlists. 90s was overhauled to remove two playlists that mixed in 2000s tracks. 2000+ was fully restructured into three balanced sub-decades: 4 playlists for 2000–2009, 4 for 2010–2019, 1 for 2020+.
   - 📊 **Charts** — Deezer global top hits (live chart, intentionally uncurated)
 - **Parallel Fetching**: All playlist IDs for a genre are fetched simultaneously using `Promise.all` for fast pool assembly.
 - **Dynamic Pool Sizing & Fallback**: Pool size is calculated as `Math.max(100, players × rounds + 10)`. If the deduplicated result is still smaller, the app fills the gap from Deezer's global top chart automatically.
@@ -41,7 +41,7 @@ A fast-paced, interactive, modern **local multiplayer music quiz** built with Re
 
 ### ❤️ Liked Songs & Player
 - **Save Songs**: Heart any song during a turn or on the results screen to add it to your persistent Liked Songs list (backed by `localStorage`). The list is capped at **20 songs** — a dismissible overlay appears when the limit is reached, with an expandable export section (Download .m3u, Download .csv, Clear List with confirmation).
-- **Liked Songs Player Modal**: Open the **Player** modal from the setup screen to browse and replay your saved songs. Preview URLs are refreshed automatically when the section is expanded (Deezer CDN links expire after ~1–2 hours). Features:
+- **Liked Songs Player Modal**: Open the **Player** modal from the setup screen to browse and replay your saved songs. Preview URLs are refreshed automatically when the section is expanded (Deezer CDN links expire after ~1–2 hours). If a URL has expired at play time, it is refreshed on-demand and retried automatically — no manual action needed. Features:
   - 🎡 Spinning vinyl turntable — idle vinyl disc placeholder, album cover fades in smoothly when a song plays.
   - Full song list with play, info, Deezer/iTunes links, and remove button.
   - TrackInfo modal stacks on top without closing the player.

@@ -59,9 +59,9 @@ export const PassDeviceScreen: React.FC = () => {
 
     // 3. Wait for both the minimum 2-second delay and year fetch to complete
     Promise.all([delayPromise, yearPromise]).then(([_, year]) => {
-      dispatch({ 
-        type: 'BEGIN_TURN', 
-        payload: { song: { ...randomSong, year } } 
+      dispatch({
+        type: 'BEGIN_TURN',
+        payload: { song: { ...randomSong, year } }
       });
     });
   };

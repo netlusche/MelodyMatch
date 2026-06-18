@@ -244,15 +244,19 @@ For these six genres, switching to `PLAYLIST_MAP` with editorially curated playl
 | Ballermann | 10328601542, 9486947662, 4789726188, 7712049342 | ✅ / ⚠️ mixed |
 | Partyhits | 2097558104, 740966875, 11203091824, 8699026122, 1917690502, 10328601542 | ✅ / ⚠️ mixed |
 
-#### 📅 Decades (6 playlists each, all curated)
+#### 📅 Decades (all curated)
 | Decade | IDs | Type |
 |---|---|---|
 | 50s | 735402575, 4020144442, 11031329462, 3954210902, 9010212882, 5958115324 | ✅ Deezer |
 | 60s | 620264073, 1437011185, 8962730322, 14597757781, 8181759022, 3566625202, 11031329462 | ✅ Deezer |
 | 70s | 1470022445, 8877326262, 5605928862, 57280214, 1319793647, 7130870324 | ✅ Deezer |
 | 80s | 867825522, 1913763402, 11384036324, 6208592984, 8512471762, 8873745702, 8403360702 | ✅ Deezer |
-| 90s | 878989033, 3829647662, 7852252022, 8873744282, 8403350722, 969361861 | ✅ Deezer |
-| 2000+ | 248297032, 715215865, 14917741483, 9100953002, 14285831341, 12272270431, 11308515444 | ✅ Deezer |
+| 90s | 878989033, 3829647662, 8873744282, 8403350722, 2322259622, 8311123682, 8027597282, 1283602355 | ✅ Deezer |
+| 2000+ | 248297032, 1977689462, 8777319042, 8951600962, 715215865, 14917741483, 9100953002, 8074581462, 13650084141 | ✅ Deezer |
+
+> **Note on 2000+ (updated):** Completely restructured for better sub-decade balance. Three community/mixed-decade playlists removed (2000s-2010s Party, "20s Hits" community, "Pop & Rock Hits 2020s–80s"). Replaced with 9 official Deezer editorial playlists split across three sub-decades: 00s (Hits, Party Hits, Ballads, Acoustic Hits), 10s (Party Hits, Hits, Ballads, Pop Rock), 20s (Hits). Previously the 2000–2009 era had only one playlist — now has four.
+
+> **Note on 90s (updated):** Two playlists were removed — "Back to the 90 & 2000er" and "Année 1990 & 2000" — because they explicitly included 2000s tracks, causing post-2000 songs to appear when only 90s was selected. Replaced with four clean editorial playlists: 90s Party Hits, 90s Pop, 90s Pop Rock, Zeitreise 90er (all Deezer editors, decade-pure).
 
 > **Note on community playlists:** If a community playlist is no longer available at runtime, the JSONP request returns an empty array and is silently skipped. The remaining playlists fill the pool. No error is shown to the user.
 
@@ -318,6 +322,7 @@ Deezer CDN preview URLs contain signed expiry tokens and become invalid after ap
 **Solution:** `refreshPreviewUrls(songs: Song[]): Promise<Song[]>` in `src/services/api.ts` re-fetches `https://api.deezer.com/track/{id}` for every song in parallel via JSONP and returns updated `Song` objects with fresh `previewUrl` values. Per-song failures are silently ignored (original URL kept as fallback).
 
 This function is called automatically:
+- In `App.tsx` when `playSong` fails with a resource/network error during the QUIZ phase — refreshes the URL on-demand and retries playback immediately. This handles the case where a Deezer CDN URL has expired mid-game without causing any double-play on normal turns.
 - In `SetupScreen` when the Liked Songs section is expanded — refreshes all Liked Songs before the user taps any cover
 - In `SetupScreen` when the Player modal (`FavoritesModal`) is opened directly — ensures URLs are fresh even if the section was never expanded
 - In `RoundReplayModal` on mount — refreshes all songs from the round

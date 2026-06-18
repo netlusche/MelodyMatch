@@ -11,6 +11,7 @@ import { BackgroundEffects } from './components/BackgroundEffects';
 import { translations } from './i18n/translations';
 
 import { audioManager } from './services/audio';
+import { refreshPreviewUrls } from './services/api';
 
 import { X } from 'lucide-react';
 
@@ -56,8 +57,18 @@ const MainApp: React.FC = () => {
 
   React.useEffect(() => {
     if (state.phase === 'QUIZ' && state.currentSong?.previewUrl) {
-      audioManager.playSong(state.currentSong.previewUrl).catch(err => {
-        console.warn("Root autoplay initiation failed:", err);
+      const song = state.currentSong;
+      audioManager.playSong(song.previewUrl).catch(async (err) => {
+        if (err.name !== 'NotAllowedError') {
+          // Resource/network error — URL may have expired, try refreshing once
+          try {
+            const refreshed = await refreshPreviewUrls([song]);
+            const freshUrl = refreshed[0]?.previewUrl;
+            if (freshUrl) audioManager.playSong(freshUrl).catch(() => {});
+          } catch {
+            // Silent fail
+          }
+        }
       });
     } else {
       audioManager.stop();
