@@ -28,9 +28,9 @@ const PLAYLIST_MAP: Record<string, number | number[]> = {
   'für kenner': [7875469222, 7981359362, 7875539102, 7875467342, 7875544882, 14663194001, 10751473082, 12754566241, 14482486843, 12754554161, 12754478601, 12754594941, 12754576441, 164030071, 8702537662, 11054623262, 15339520123], // Classic Rock/Metal/Hip-Hop/New Wave Deep Cuts, Hidden Gems of Rock, Post-Punk Deep Cuts, The Cure/Depeche Mode/Smiths/New Order/Bowie/U2/R.E.M./Queen/Prince/Elton John/Madonna Deep Cuts
 
   // Decades
-  '50s': [735402575, 4020144442, 11031329462, 3954210902, 9010212882, 5958115324], // 50s Rock 'n' Roll, Billboard 50s, Rock 'n' Roll classics, 50er/60er, 50's Blues, 50's Jazz
-  '60s': [620264073, 1437011185, 8962730322, 14597757781, 8181759022, 3566625202, 11031329462], // 60s Hits, 60s Rock, 60s Pop, 60s Ballads, Billboard 60s, 60er, Rock 'n' Roll classics
-  '70s': [1470022445, 8877326262, 5605928862, 57280214, 1319793647, 7130870324], // 70s Hits, 70s Happy Hits, 70er Jahre, 1970s, 70s Hits Top 100, 70s Greatest Hits
+  '50s': [735402575, 4020144442, 9010212882, 5958115324], // 50s Rock 'n' Roll, Billboard 50s, 50's Blues, 50's Jazz
+  '60s': [620264073, 1437011185, 8962730322, 14597757781, 3566625202, 9002635962, 8462280522], // 60s Hits, 60s Rock, 60s Pop, 60s Ballads, 60er, 60s Happy Hits, 60s Soul
+  '70s': [1470022445, 8877326262, 5605928862, 57280214, 1319793647, 8496467462, 8403499142], // 70s Hits, 70s Happy Hits, 70er Jahre, 1970s, 70s Hits Top 100, 70s Party Hits, 70s Ballads
   '80s': [867825522, 1913763402, 11384036324, 6208592984, 8512471762, 8873745702, 8403360702], // 80s Hits, 80s Party Hits, 80's Essentials, 1980s, 80s Pop, 80s Happy Hits, 80s Ballads
   '90s': [878989033, 3829647662, 8873744282, 8403350722, 2322259622, 8311123682, 8027597282, 1283602355], // 90s Hits, 90er Party Hits, 90s Happy Hits, 90s Ballads, 90s Party Hits, 90s Pop, 90s Pop Rock, Zeitreise 90er
   '2000+': [248297032, 1977689462, 8777319042, 8951600962, 715215865, 14917741483, 9100953002, 8074581462, 13650084141], // 00s Hits, 00s Party Hits, 00s Ballads, 00s Acoustic Hits, 10s Party Hits, 10s Hits, 10s Ballads, 2010s Pop Rock, 20s Hits
