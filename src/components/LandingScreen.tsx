@@ -12,7 +12,7 @@ export const LandingScreen: React.FC = () => {
     <div className="screen landing-screen fade-in">
       <div className="landing-logo-wrap">
         <img
-          src="/pwa-512.png"
+          src="./pwa-512.png"
           alt="MelodyMatch Logo"
           className="landing-logo"
           width={160}
