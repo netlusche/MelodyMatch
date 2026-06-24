@@ -1783,8 +1783,8 @@ body {
 }
 
 .landing-logo {
-  width: 160px;
-  height: 160px;
+  width: 250px;
+  height: 250px;
   border-radius: 28px;
   object-fit: contain;
   filter: drop-shadow(0 8px 32px var(--glow-primary));
