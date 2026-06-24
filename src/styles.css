@@ -1,29 +1,29 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
 
 :root, .theme-default {
-  /* Neon Party Theme */
-  --primary: #8b5cf6;
-  --primary-hover: #7c3aed;
-  --secondary: #ec4899;
-  --bg: #09090b;
-  --bg-image: radial-gradient(circle at top right, rgba(139, 92, 246, 0.15), transparent 40%),
-                    radial-gradient(circle at bottom left, rgba(236, 72, 153, 0.15), transparent 40%);
-  --card: #18181b;
-  --card-hover: #27272a;
-  --text: #ffffff;
-  --text-muted: #a1a1aa;
+  /* MelodyMatch Theme */
+  --primary: #ae35ff;
+  --primary-hover: #9420e5;
+  --secondary: #00d4ee;
+  --bg: #07051a;
+  --bg-image: radial-gradient(circle at top right, rgba(174, 53, 255, 0.18), transparent 45%),
+                    radial-gradient(circle at bottom left, rgba(0, 212, 238, 0.12), transparent 45%);
+  --card: #100c2a;
+  --card-hover: #181240;
+  --text: #f2eeff;
+  --text-muted: #9e88c8;
   --danger: #ef4444;
   --success: #10b981;
   --gold: #fbbf24;
-  --border: rgba(255, 255, 255, 0.1);
-  --border-hover: rgba(255, 255, 255, 0.25);
-  --glow-primary: rgba(139, 92, 246, 0.6);
-  --glow-success: rgba(16, 185, 129, 0.6);
+  --border: rgba(174, 53, 255, 0.18);
+  --border-hover: rgba(174, 53, 255, 0.38);
+  --glow-primary: rgba(174, 53, 255, 0.55);
+  --glow-success: rgba(0, 212, 238, 0.45);
   --glow-danger: rgba(239, 68, 68, 0.6);
   --glow-gold: rgba(251, 191, 36, 0.6);
-  --badge-bg: rgba(255, 255, 255, 0.05);
-  --badge-border: rgba(255, 255, 255, 0.1);
-  --row-bg: rgba(255, 255, 255, 0.05);
+  --badge-bg: rgba(174, 53, 255, 0.08);
+  --badge-border: rgba(174, 53, 255, 0.18);
+  --row-bg: rgba(174, 53, 255, 0.05);
 }
 
 .theme-plain_white {
@@ -888,6 +888,32 @@ body {
   --row-bg: rgba(255, 0, 51, 0.06);
 }
 
+.theme-neon_party {
+  /* Neon Party Theme */
+  --primary: #8b5cf6;
+  --primary-hover: #7c3aed;
+  --secondary: #ec4899;
+  --bg: #09090b;
+  --bg-image: radial-gradient(circle at top right, rgba(139, 92, 246, 0.15), transparent 40%),
+                    radial-gradient(circle at bottom left, rgba(236, 72, 153, 0.15), transparent 40%);
+  --card: #18181b;
+  --card-hover: #27272a;
+  --text: #ffffff;
+  --text-muted: #a1a1aa;
+  --danger: #ef4444;
+  --success: #10b981;
+  --gold: #fbbf24;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-hover: rgba(255, 255, 255, 0.25);
+  --glow-primary: rgba(139, 92, 246, 0.6);
+  --glow-success: rgba(16, 185, 129, 0.6);
+  --glow-danger: rgba(239, 68, 68, 0.6);
+  --glow-gold: rgba(251, 191, 36, 0.6);
+  --badge-bg: rgba(255, 255, 255, 0.05);
+  --badge-border: rgba(255, 255, 255, 0.1);
+  --row-bg: rgba(255, 255, 255, 0.05);
+}
+
 /* Light theme legibility improvements (Plain White, Sakura, Frutiger Aero) */
 .theme-plain_white .glow-text,
 .theme-sakura .glow-text,
@@ -1733,4 +1759,170 @@ body {
   color: var(--primary);
   opacity: 1;
   text-decoration: underline;
+}
+
+/* ============================================================
+   LANDING SCREEN
+   ============================================================ */
+
+.landing-screen {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 1.25rem 1.5rem;
+  gap: 0;
+}
+
+.landing-logo-wrap {
+  margin-bottom: 1.25rem;
+}
+
+@keyframes logoPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+.landing-logo {
+  width: 160px;
+  height: 160px;
+  border-radius: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 32px var(--glow-primary));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .landing-logo {
+    animation: logoPulse 2.8s ease-in-out infinite;
+  }
+}
+
+.landing-title {
+  font-size: 2.6rem;
+  font-weight: 800;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.1;
+}
+
+.landing-tagline {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin: 0 0 1.75rem 0;
+  letter-spacing: 0.03em;
+}
+
+.landing-cta {
+  font-size: 1.15rem !important;
+  padding: 0.9rem 2rem !important;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.landing-share {
+  margin-top: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.landing-share-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.landing-version {
+  margin-top: 1.5rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+/* ============================================================
+   SHARE BAR
+   ============================================================ */
+
+.share-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  text-decoration: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.share-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.share-btn:active {
+  transform: scale(0.95);
+  opacity: 0.75;
+}
+
+.share-btn-theme {
+  background: var(--card-hover);
+  color: var(--text);
+}
+
+.share-btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* ============================================================
+   NEW GAME PILL (Winner Screen)
+   ============================================================ */
+
+.new-game-pill {
+  display: block;
+  margin: 0 auto;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  padding: 0.4rem 1.2rem;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.new-game-pill:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+.new-game-pill:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   INLINE SPINNER (for async buttons)
+   ============================================================ */
+
+.spinner {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  flex-shrink: 0;
 }

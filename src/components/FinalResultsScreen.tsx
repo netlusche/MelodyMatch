@@ -10,7 +10,9 @@ import { getThemeConfettiColors } from '../utils/confettiColors';
 import { TrackInfoModal } from './TrackInfoModal';
 import { RoundReplayModal } from './RoundReplayModal';
 import { audioManager } from '../services/audio';
-import { refreshPreviewUrls } from '../services/api';
+import { refreshPreviewUrls, fetchSongs } from '../services/api';
+import { ShareBar } from './ShareBar';
+import { AppFooter } from './AppFooter';
 
 export const FinalResultsScreen: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -118,14 +120,25 @@ export const FinalResultsScreen: React.FC = () => {
     return parts.length > 0 ? parts.join(', ') : t.noneLabel;
   };
 
-  const [isTransitioning, setIsTransitioning] = React.useState(false);
+  const [isFetchingPool, setIsFetchingPool] = React.useState(false);
+  const [playAgainError, setPlayAgainError] = React.useState(false);
 
-  const handlePlayAgain = () => {
-    if (isTransitioning) return;
+  const handlePlayAgainSame = async () => {
+    if (isFetchingPool) return;
     audioManager.pause();
-    setIsTransitioning(true);
-    dispatch({ type: 'PLAY_AGAIN' });
+    setIsFetchingPool(true);
+    setPlayAgainError(false);
+    try {
+      const poolSize = Math.max(100, state.players.length * state.totalRounds + 10);
+      const pool = await fetchSongs(poolSize, state.genres);
+      if (!pool || pool.length === 0) throw new Error('empty pool');
+      dispatch({ type: 'PLAY_AGAIN_SAME', payload: { pool } });
+    } catch {
+      setPlayAgainError(true);
+      setIsFetchingPool(false);
+    }
   };
+
 
   return (
     <div className="screen final-results fade-in" style={{ gap: '0.5rem' }}>
@@ -310,12 +323,38 @@ export const FinalResultsScreen: React.FC = () => {
         </div>
       )}
 
-      <div className="mt-4 w-full">
-        <button className="option-button primary large w-full group" onClick={handlePlayAgain}>
-          <RotateCcw size={24} className="group-hover-spin" />
+      <div className="mt-4 w-full" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <button
+          className="option-button primary large w-full group"
+          onClick={handlePlayAgainSame}
+          disabled={isFetchingPool}
+          style={{ opacity: isFetchingPool ? 0.7 : 1 }}
+        >
+          {isFetchingPool ? (
+            <span className="spinner" style={{ width: 22, height: 22, borderWidth: 3 }} />
+          ) : (
+            <RotateCcw size={24} className="group-hover-spin" />
+          )}
           <span>{t.playAgain}</span>
         </button>
+        {playAgainError && (
+          <p style={{ textAlign: 'center', color: 'var(--danger)', fontSize: '0.82rem', margin: 0 }}>
+            {state.lang === 'de' ? 'Fehler beim Laden. Bitte nochmal versuchen.' : 'Could not load songs. Please try again.'}
+          </p>
+        )}
       </div>
+
+      <div className="mt-3 w-full" style={{ paddingTop: '0.75rem' }}>
+        <ShareBar
+          lang={state.lang}
+          shareText={t.shareText}
+          copyLabel={t.copyLink}
+          copiedLabel={t.copied}
+          shareLabel={t.shareGame}
+        />
+      </div>
+
+      <AppFooter />
 
       {showFavFull && (
         <LikedSongsFullOverlay

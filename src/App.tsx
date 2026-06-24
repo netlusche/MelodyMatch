@@ -1,6 +1,7 @@
 import React from 'react';
 import { GameProvider, useGame } from './state/GameContext';
 import { useWakeLock } from './hooks/useWakeLock';
+import { LandingScreen } from './components/LandingScreen';
 import { SetupScreen } from './components/SetupScreen';
 import { PassDeviceScreen } from './components/PassDeviceScreen';
 import { TurnResultScreen } from './components/TurnResultScreen';
@@ -19,6 +20,8 @@ const MainContent: React.FC = () => {
   const { state } = useGame();
 
   switch (state.phase) {
+    case 'LANDING':
+      return <LandingScreen />;
     case 'SETUP':
       return <SetupScreen />;
     case 'GENRE_SELECTION':
@@ -123,9 +126,9 @@ const MainApp: React.FC = () => {
       <BackgroundEffects />
       <MainContent />
       
-      {state.phase !== 'SETUP' && (
-        <button 
-          onClick={() => setShowStartOverConfirm(true)} 
+      {state.phase !== 'SETUP' && state.phase !== 'LANDING' && (
+        <button
+          onClick={() => setShowStartOverConfirm(true)}
           className="start-over-btn"
         >
           {t.startOver}
@@ -176,7 +179,7 @@ const MainApp: React.FC = () => {
         </div>
       )}
 
-      {state.phase !== 'SETUP' && state.phase !== 'GENRE_SELECTION' && (
+      {state.phase !== 'SETUP' && state.phase !== 'GENRE_SELECTION' && state.phase !== 'LANDING' && (
         <button
           onClick={() => setShowGenresOverlay(true)}
           className="selected-genres-link"
@@ -185,7 +188,7 @@ const MainApp: React.FC = () => {
         </button>
       )}
 
-      {state.phase !== 'SETUP' && state.phase !== 'GENRE_SELECTION' && (
+      {state.phase !== 'SETUP' && state.phase !== 'GENRE_SELECTION' && state.phase !== 'LANDING' && (
         <button
           onClick={() => setShowScoreOverlay(true)}
           className="score-btn"

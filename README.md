@@ -7,6 +7,7 @@ A fast-paced, interactive, modern **local multiplayer music quiz** built with Re
 ## ✨ Features
 
 ### 🎮 Gameplay
+- **Landing Screen**: A branded splash screen greets new sessions with the MelodyMatch logo (softly pulsing), app title, tagline, a "Let's Play!" CTA, and a social share bar. Existing sessions from `localStorage` are restored directly to the active game phase.
 - **Local Multiplayer**: Pass one device between players — each player gets their own turn to guess title, artist, and release year.
 - **Double-Click & Rapid-Tap Protection**: State transition buttons and answer grids are guarded against rapid consecutive taps, preventing accidental step skips or out-of-sync audio.
 
@@ -52,6 +53,8 @@ A fast-paced, interactive, modern **local multiplayer music quiz** built with Re
 
 ### 🏆 End Screen & Round Replay
 - **Winner Screen**: Confetti animation, leaderboard, and full played-songs history with per-song points breakdown.
+- **Play Again (Same Setup)**: The primary "Play Again" button on the winner screen fetches a fresh song pool with the same players and genres, then jumps directly to the first turn — no setup, no genre selection. Shows a loading spinner during fetch; reports an error inline if the fetch fails (button re-enabled for retry). The "Start over" button in the persistent footer bar resets everything and returns to the Landing Screen.
+- **Social Share Bar**: Shown on both the Landing Screen and the Winner Screen — WhatsApp, Facebook, Telegram, Reddit, Native Share (`navigator.share()`, shown only when available), Copy Link. SVG icons, no external package.
 - **Round Replay Player Modal**: Open the **Player** modal from the winner screen to relisten to all songs from the round. Same spinning turntable, same song info — including who played it and what points were scored.
 
 ### 📖 Song Information
@@ -59,7 +62,7 @@ A fast-paced, interactive, modern **local multiplayer music quiz** built with Re
 - **Genius Lyrics Links**: Generates direct Genius.com links client-side with localized artist slug handling (including NDW-specific mismatch corrections).
 
 ### 🎨 Themes & Visuals
-- **10 Visual Themes**: Default (Neon Party), Plain White, Plain Dark, Cyberpunk, Vaporwave, Westeros, Sakura, Frutiger Aero, Synthwave, Heavy Metal / Rock Legends, Kraftwerk, LCARS, Matrix, Post-Punk — each with a unique color palette and canvas animation.
+- **15 Visual Themes**: Default (MelodyMatch brand colors), Plain White, Plain Dark, Matrix, Vaporwave, Westeros, Sakura, LCARS, Frutiger Aero, Synthwave, Heavy Metal, Post-Punk, Rock Legends, Kraftwerk, Neon Party — each with a unique color palette and canvas animation.
 - **Canvas Background Animations**: High-performance `<canvas>` loop with theme-specific effects (neon particles, Matrix code rain, fire embers, cherry blossoms, bubbles, scan lines, etc.). Automatically respects `prefers-reduced-motion`.
 - **Custom Theme Dropdown**: Always renders downward to prevent clipping on mobile screens.
 

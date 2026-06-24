@@ -40,12 +40,19 @@ export const BackgroundEffects: React.FC = () => {
       color: string;
     }
     const orbs: Orb[] = [];
-    const colors = [
+    const defaultColors = [
+      'rgba(174, 53, 255, 0.09)',
+      'rgba(233, 30, 170, 0.08)',
+      'rgba(0, 212, 238, 0.08)',
+      'rgba(255, 107, 0, 0.05)'
+    ];
+    const neonPartyColors = [
       'rgba(139, 92, 246, 0.08)',
       'rgba(236, 72, 153, 0.08)',
       'rgba(16, 185, 129, 0.06)',
       'rgba(6, 182, 212, 0.06)'
     ];
+    const colors = theme === 'neon_party' ? neonPartyColors : defaultColors;
     const initOrbs = () => {
       orbs.length = 0;
       const count = Math.min(15, Math.floor(cv.width / 70));
@@ -329,7 +336,7 @@ export const BackgroundEffects: React.FC = () => {
       cv.width = window.innerWidth;
       cv.height = window.innerHeight;
 
-      if (theme === 'default') initOrbs();
+      if (theme === 'default' || theme === 'neon_party') initOrbs();
       else if (theme === 'matrix') initMatrixLines();
       else if (theme === 'westeros') initEmbers();
       else if (theme === 'sakura') initPetals();
@@ -356,7 +363,8 @@ export const BackgroundEffects: React.FC = () => {
       }
 
       switch (theme) {
-        case 'default': {
+        case 'default':
+        case 'neon_party': {
           orbs.forEach(orb => {
             orb.x += orb.vx;
             orb.y += orb.vy;

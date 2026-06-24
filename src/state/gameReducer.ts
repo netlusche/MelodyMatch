@@ -9,7 +9,9 @@ export type GameAction =
   | { type: 'NEXT_STEP'; payload: { step: QuestionStep } }
   | { type: 'END_TURN'; payload: { isCorrect: boolean; points: number } }
   | { type: 'NEXT_TURN' }
+  | { type: 'GO_TO_SETUP' }
   | { type: 'PLAY_AGAIN' }
+  | { type: 'PLAY_AGAIN_SAME'; payload: { pool: Song[] } }
   | { type: 'RESET_GAME' }
   | { type: 'SET_THEME'; payload: { theme: Theme } }
   | { type: 'UPDATE_SONG_YEAR'; payload: { songId: number; year: string } };
@@ -21,7 +23,7 @@ export const initialState: GameState = {
   currentPlayerIndex: 0,
   currentRound: 1,
   totalRounds: 10,
-  phase: 'SETUP',
+  phase: 'LANDING',
   songPool: [],
   currentSong: null,
   currentStep: 'TITLE',
@@ -137,6 +139,8 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
         turnPoints: 0,
       };
     }
+    case 'GO_TO_SETUP':
+      return { ...state, phase: 'SETUP' };
     case 'PLAY_AGAIN':
       return {
         ...state,
@@ -145,6 +149,16 @@ export const gameReducer = (state: GameState, action: GameAction): GameState => 
         phase: 'SETUP',
         players: state.players.map((p) => ({ ...p, score: 0 })),
         history: [],
+      };
+    case 'PLAY_AGAIN_SAME':
+      return {
+        ...state,
+        currentPlayerIndex: 0,
+        currentRound: 1,
+        phase: 'PASS_DEVICE',
+        players: state.players.map((p) => ({ ...p, score: 0 })),
+        history: [],
+        songPool: action.payload.pool,
       };
     case 'RESET_GAME':
       return {

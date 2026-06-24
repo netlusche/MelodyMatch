@@ -12,7 +12,7 @@ export default defineConfig({
         name: 'MelodyMatch',
         short_name: 'MelodyMatch',
         description: 'Local multiplayer music quiz — guess the song!',
-        theme_color: '#6366f1',
+        theme_color: '#ae35ff',
         background_color: '#0f0f1a',
         display: 'standalone',
         orientation: 'portrait',

@@ -93,12 +93,12 @@ Defined in `src/types/index.ts`. The full state shape:
 ```typescript
 interface GameState {
   lang: Language;               // 'en' | 'de'
-  theme: Theme;                 // one of 14 theme keys
+  theme: Theme;                 // one of 15 theme keys
   players: Player[];
   currentPlayerIndex: number;
   currentRound: number;
   totalRounds: number;
-  phase: GamePhase;             // 'SETUP' | 'GENRE_SELECTION' | 'PASS_DEVICE' | 'QUIZ' | 'TURN_RESULT' | 'FINAL_RESULTS'
+  phase: GamePhase;             // 'LANDING' | 'SETUP' | 'GENRE_SELECTION' | 'PASS_DEVICE' | 'QUIZ' | 'TURN_RESULT' | 'FINAL_RESULTS'
   songPool: Song[];
   currentSong: Song | null;
   currentStep: QuestionStep;    // 'TITLE' | 'ARTIST' | 'YEAR'
@@ -115,6 +115,7 @@ interface GameState {
 
 | Action | Trigger |
 |---|---|
+| `GO_TO_SETUP` | "Let's Play!" clicked on Landing Screen → `SETUP` |
 | `CONTINUE_TO_GENRES` | Player setup confirmed |
 | `START_GAME` | Genres confirmed, pool fetch begins |
 | `SET_SONG_POOL` | Pool fetch completed |
@@ -124,7 +125,9 @@ interface GameState {
 | `END_TURN` | Turn completed, score added to history |
 | `NEXT_TURN` | Advance to next player/round |
 | `UPDATE_SONG_YEAR` | Year lookup result arrives asynchronously |
-| `PLAY_AGAIN` | Reset game, keep players and settings |
+| `PLAY_AGAIN` | Keep players, go back to `SETUP` (change settings) |
+| `PLAY_AGAIN_SAME` | Fresh pool fetched async; keep players + genres; go to `PASS_DEVICE` |
+| `RESET_GAME` | Full reset to `initialState` → `LANDING` (keeps theme) |
 | `SET_THEME` | Theme changed from dropdown |
 
 ### Context & localStorage Sync
@@ -145,16 +148,22 @@ On mount, the stored state is rehydrated. This allows the game to survive accide
 ## 4. Game Flow
 
 ```
-SETUP → GENRE_SELECTION → PASS_DEVICE → QUIZ → TURN_RESULT → [next player...]
-                                                              → FINAL_RESULTS
+LANDING → SETUP → GENRE_SELECTION → PASS_DEVICE → QUIZ → TURN_RESULT → [next player...]
+                                                                        → FINAL_RESULTS
+                                                                             │
+                                        ┌────────── PLAY_AGAIN_SAME ────────┘
+                                        │           (fresh pool, same players/genres)
+                                        └──────────► PASS_DEVICE
+                                        RESET_GAME ──────────────────────► LANDING
 ```
 
+- **LANDING**: Splash screen shown on fresh sessions and after `RESET_GAME`. Logo, title, tagline, "Let's Play!" button, Social Share Bar. Existing `localStorage` sessions bypass this screen (state rehydration overrides `initialState`).
 - **SETUP**: Players add their names, set round count and language. Liked Songs are displayed here.
 - **GENRE_SELECTION**: One or more genres/decades are selected. Confirming triggers `fetchSongs()` in the background.
 - **PASS_DEVICE**: Device is passed to the active player. Year pre-fetch (`fetchTrackYear`) runs asynchronously during this screen.
 - **QUIZ**: Audio plays. Three sequential steps (TITLE, ARTIST, YEAR) with multiple-choice grids and a 30-second timer.
 - **TURN_RESULT**: Score breakdown for the completed turn.
-- **FINAL_RESULTS**: Leaderboard, full played-songs history, Round Replay Player modal.
+- **FINAL_RESULTS**: Leaderboard, full played-songs history, Round Replay Player modal. Primary button: "Play Again" → fetches new pool async → `PLAY_AGAIN_SAME`. "Start over" in the persistent footer bar → `RESET_GAME` → `LANDING`.
 
 ---
 
@@ -294,12 +303,15 @@ Both player modals render `TrackInfoModal` internally when a song's info icon is
 
 | Component | Phase | Description |
 |---|---|---|
+| `LandingScreen` | LANDING | Splash: logo, title, tagline, CTA, Social Share Bar |
 | `SetupScreen` | SETUP | Player names, round count, language, liked songs list |
 | `GenreScreen` | GENRE_SELECTION | Multi-select genre/decade tiles |
 | `PassDeviceScreen` | PASS_DEVICE | Pass-the-device interstitial, year lookup runs here |
 | `QuizScreen` | QUIZ | Audio playback, answer grid, timer, blur mode |
 | `TurnResultScreen` | TURN_RESULT | Per-turn score breakdown |
-| `FinalResultsScreen` | FINAL_RESULTS | Leaderboard, history, confetti |
+| `FinalResultsScreen` | FINAL_RESULTS | Leaderboard, history, confetti, Play Again / New Game |
+| `ShareBar` | LANDING + FINAL_RESULTS | Social share buttons (WA/FB/TG/Reddit/Native/Copy) |
+| `AppFooter` | LANDING + SETUP + FINAL_RESULTS | API credits + version number (shared component) |
 
 `App.tsx` routes between screens based on `state.phase`.
 
